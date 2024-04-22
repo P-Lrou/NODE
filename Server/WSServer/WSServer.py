@@ -1,4 +1,5 @@
 from tools.DLog import DLog
+from Message.MessageHandler import MessageHandler
 from websocket_server import WebsocketServer
 import json
 import uuid
@@ -9,6 +10,7 @@ class WSServer:
         self.host = host
         self.port = port
         self.current_users = []
+        self.messageHandler = MessageHandler()
 
     def handle_new_connection(self, client, server):
         uid = str(uuid.uuid4())
@@ -31,9 +33,7 @@ class WSServer:
 
     def handle_message(self, client, server, message):
         DLog.Log(f"Received message from {client['id']}: {message}")
-        # response = f"Echo: {message}"
-        # server.send_message(client, response)
-        # DLog.Log(f"Sent response to {client['id']}: {response}")
+        self.messageHandler.process_message(message, server, client)
 
     def start(self):
         DLog.LogSuccess(f"Server starting at ws://{self.host}:{self.port}")
