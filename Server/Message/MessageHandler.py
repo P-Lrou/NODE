@@ -22,4 +22,5 @@ class MessageHandler:
                         return {"error": "Unknown activity type"}
                 else:
                     return {"error": "Activity type not specified"}
-        return {"error": "Unknown message type"}
+        else:
+            return {"error": "Unknown message type"}
