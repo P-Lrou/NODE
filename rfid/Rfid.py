@@ -1,9 +1,8 @@
 from mfrc522 import SimpleMFRC522
 
 
-class Rfid():
+class Rfid:
     def __init__(self, delegate=None) -> None:
-        super().__init__()
         self.delegate = delegate
         self.reader = SimpleMFRC522()
         self.card_presence = False
