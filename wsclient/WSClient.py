@@ -40,5 +40,5 @@ class WSClient(Thread):
 
     @staticmethod
     def connectToVPS(delegate=None):
-        uri = "ws://{ip}:{port}"
+        uri = "ws://{ip}:{port}".format(ip="websocket.rezurrection.website", port=8765)
         return WSClient(uri, delegate)
