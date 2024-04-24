@@ -1,4 +1,4 @@
 from WSServer.WSManager import WSManager
 
-wsManager = WSManager('localhost', 8765)
+wsManager = WSManager('websocket.rezurrection.website', 8765)
 wsManager.start()
