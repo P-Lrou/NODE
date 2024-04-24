@@ -14,3 +14,7 @@ class WSManager:
             DLog.LogWhisper("Server started in a new thread.")
         else:
             self.server.start()
+
+    @staticmethod
+    def setupVPS():
+        return WSManager('websocket.rezurrection.website', 8765)
