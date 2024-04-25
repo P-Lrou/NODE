@@ -32,7 +32,7 @@ class LEDController:
             GPIO.output(led, GPIO.LOW)
 
 if __name__ == "__main__":
-    led_pins = [23, 27, 22]
+    led_pins = [17, 27, 22, 6, 13, 19, 26]
     led_controller = LEDController(led_pins)
     led_controller.all_on()
     time.sleep(1)
