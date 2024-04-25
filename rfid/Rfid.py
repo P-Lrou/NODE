@@ -32,8 +32,8 @@ class Rfid:
                         self.delegate.rfid_removed()
                 self.card_presence = False
 
-    def write_no_block(self, text):
-        id, text = self.reader.write_no_block(text)
+    def write_no_block(self, text_to_write):
+        id, text = self.reader.write(text_to_write)
         if self.delegate:
             if id:
                 self.delegate.rfid_has_written(text)

@@ -1,6 +1,5 @@
 from Rfid import Rfid
 from RfidDelegate import RfidDelegate
-import time
 
 class MyDelegate(RfidDelegate):
     def __init__(self) -> None:
@@ -13,6 +12,7 @@ class MyDelegate(RfidDelegate):
         ]
         self.actual_activities = 0
         self.writing = False
+        self.block = False
 
     def set_rfid(self, rfid):
         self.rfid = rfid
@@ -25,8 +25,11 @@ class MyDelegate(RfidDelegate):
         super().rfid_detected(rfid_data)
         if self.rfid:
             if len(self.activities) > self.actual_activities:
-                self.writing = True
-                self.rfid.write_no_block(self.activities[self.actual_activities])
+                if not self.block:
+                    self.writing = True
+                    self.rfid.write_no_block(self.activities[self.actual_activities])
+                else:
+                    print("Please remove the card")
             else:
                 if self.writing:
                     self.writing = False
@@ -40,12 +43,13 @@ class MyDelegate(RfidDelegate):
 
     def rfid_has_written(self, text):
         super().rfid_has_written(text)
+        self.block = True
         print(f"Written '{text}' with success!")
-        time.sleep(1)
         self.actual_activities += 1
 
     def rfid_removed(self):
         super().rfid_removed()
+        self.block = False
         if self.writing:
             self.writing = False
             print("Fail to write")
