@@ -13,3 +13,9 @@ class RfidDelegate:
 
     def rfid_not_detected(self):
         pass
+
+    def rfid_has_written(self, text):
+        pass
+
+    def rfid_not_written(self):
+        pass
