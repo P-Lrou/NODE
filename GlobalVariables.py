@@ -6,9 +6,10 @@ class LedPins:
         self.matchmaking_number = [6, 13, 19, 26]
         self.activities_number = [17, 27, 22]
         self.activities_led_number = {}
-        if len(self.activities_number) == len(Activities.instance.activities):
-            for i in range(0, len(Activities.instance.activities)):
-                self.activities_led_number[Activities.instance.activities[i]] = self.activities_number[i]
+        activities = Activities.instance().activities
+        if len(self.activities_number) == len(activities):
+            for i in range(0, len(activities)):
+                self.activities_led_number[activities[i]] = self.activities_number[i]
         else:
             print("No matching length between activities_number and activities")
 
