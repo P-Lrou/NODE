@@ -13,7 +13,7 @@ class Rfid:
         if id:
             rfid_data = {
                 "id": id,
-                "text": text
+                "text": text.replace(" ", "")
             }
             self.array_detect_state = []
             if self.delegate:

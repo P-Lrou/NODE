@@ -18,7 +18,7 @@ class IOTManager:
 
         #* Rfid reader
         from rfid.Rfid import Rfid
-        rfid_callback = RfidCallback()
+        rfid_callback = RfidCallback(self.ws_client)
         self.rfid = Rfid(rfid_callback)
 
         #* Led controller

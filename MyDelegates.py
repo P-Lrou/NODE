@@ -21,11 +21,11 @@ class RfidCallback(RfidDelegate):
     
     def rfid_placed(self, rfid_data):
         super().rfid_placed(rfid_data)
-        activities = Activities.instance.activities
+        activities = Activities.instance().activities
         if rfid_data["text"] in activities:
             for activity in activities:
-                if rfid_data["text"].startsWith(activity):
-                    if self.ws_client is None:
+                if rfid_data["text"].startswith(activity):
+                    if self.ws_client is not None:
                         self.ws_client.send_message(activity)
                     else:
                         print("Error: Fail to send message")
