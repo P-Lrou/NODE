@@ -1,3 +1,4 @@
+from multipledispatch import dispatch
 from Led import Led
 import time
 
@@ -16,8 +17,11 @@ class LEDController:
     def __init__(self, pin_numbers):
 
         self.leds = []
+        self.leds_by_pin = {}
         for pin_number in pin_numbers:
-            self.leds.append(Led(pin_number))
+            led = Led(pin_number)
+            self.leds.append(led)
+            self.leds_by_pin[pin_number] = led
         self.counter = 0
 
     def test_all(self):
@@ -28,17 +32,35 @@ class LEDController:
             led.off()
             time.sleep(0.7)
 
+    @dispatch()
     def on(self):
         led = self.leds[self.counter]
         led.on()
         if self.counter < len(self.leds)-1:
             self.counter += 1
+    
+    @dispatch(int)
+    def on(self, pin_number):
+        if pin_number in self.leds_by_pin:
+            led = self.leds_by_pin[pin_number]
+            led.on()
+        else:
+            print("This pin number has not been instantiated")
 
+    @dispatch()
     def off(self):
         led = self.leds[self.counter]
         led.off()
         if self.counter > 0:
             self.counter -= 1
+
+    @dispatch(int)
+    def off(self, pin_number):
+        if pin_number in self.leds_by_pin:
+            led = self.leds_by_pin[pin_number]
+            led.off()
+        else:
+            print("This pin number has not been instantiated")
 
     def toggle(self):
         for led in self.leds:
