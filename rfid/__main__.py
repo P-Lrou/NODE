@@ -7,7 +7,7 @@ class MyDelegate(RfidDelegate):
 
     def rfid_placed(self, rfid_data):
         super().rfid_placed(rfid_data)
-        print(f"id: {rfid_data['id']}")
+        print(f"Data: {rfid_data}")
 
 my_delegate = MyDelegate()
 rfid = Rfid(my_delegate)
