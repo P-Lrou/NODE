@@ -3,8 +3,8 @@ class WSDelegate:
         print("Connection opened")
         pass
 
-    def on_message(self, message):
-        print(f"Message received: {message}")
+    def on_message(self, json_message):
+        print(f"Message received: {json_message}")
         pass
 
     def on_error(self, error):
