@@ -1,12 +1,16 @@
 from GlobalVariables import *
 from MyDelegates import *
+import RPi.GPIO as GPIO
 
 class IOTManager:
     def __del__(self):
-        for led_controller in self.led_controllers:
-            del led_controller
+        GPIO.cleanup()
 
     def __init__(self) -> None:
+        #* Setup GPIO
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setwarnings(False)
+
         #* Websocket client
         from wsclient.WSClient import WSClient
         ws_client_callback = WSClientCallback()
@@ -19,8 +23,8 @@ class IOTManager:
 
         #* Led controller
         from led.LedController import LEDController
-        self.led_matchmaking = LEDController(pin_numbers=LedPins.instance.matchmaking_number)
-        self.led_activities = LEDController(pin_by_name=LedPins.instance.activities_led_number)
+        self.led_matchmaking = LEDController(pin_numbers=LedPins.instance().matchmaking_number)
+        self.led_activities = LEDController(pin_by_name=LedPins.instance().activities_led_number)
         self.led_controllers = [
             self.led_matchmaking,
             self.led_activities

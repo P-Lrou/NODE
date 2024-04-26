@@ -1,5 +1,5 @@
 from multipledispatch import dispatch
-from Led import Led
+from led.Led import Led
 import time
 
 class LedDictionnary:
@@ -15,8 +15,6 @@ class LedDictionnary:
 
 #* MAKE SURE TO CLOSE AT THE END OF YOUR CODE
 class LEDController:
-    def __del__(self):
-        self.close()
         
     def __init__(self, pin_numbers=None, pin_by_name=None):
         self.counter = 0
@@ -25,7 +23,7 @@ class LEDController:
         self.key_type = None
         if pin_numbers is None and pin_by_name is None:
             print("Error: pin_numbers and pin_by_name is None")
-        elif pin_number is not None and pin_by_name is not None:
+        elif pin_numbers is not None and pin_by_name is not None:
             print("Error: You can not instanciate leds by pin_numbers and pin_by_name")
         else:
             if pin_numbers is not None:
@@ -39,7 +37,7 @@ class LEDController:
                     else:
                         print("Error: pin_numbers is empty")
                 else:
-                    print("Error: pin_number is not a list")
+                    print("Error: pin_numbers is not a list")
             elif pin_by_name is not None:
                 if isinstance(pin_by_name, dict):
                     self.key_type = str
@@ -130,7 +128,3 @@ class LEDController:
     def all_off(self):
         for led in self.leds:
             led.off()
-
-    def close(self):
-        for led in self.leds:
-            led.close()

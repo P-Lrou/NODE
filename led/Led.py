@@ -2,8 +2,6 @@ import RPi.GPIO as GPIO
 
 class Led:
     def __init__(self, pin_number) -> None:
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
         self.pin_number = pin_number
         GPIO.setup(self.pin_number, GPIO.OUT)
         GPIO.output(self.pin_number, GPIO.LOW)
@@ -19,6 +17,3 @@ class Led:
 
     def toggle(self):
         GPIO.output(self.pin_number, not self.state)
-
-    def close(self):
-        GPIO.cleanup()
