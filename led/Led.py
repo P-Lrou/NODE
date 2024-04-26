@@ -17,3 +17,4 @@ class Led:
 
     def toggle(self):
         GPIO.output(self.pin_number, not self.state)
+        self.state = not self.state
