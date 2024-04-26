@@ -1,4 +1,4 @@
-from mfrc522 import SimpleMFRC522
+from rfid.mfrc522 import SimpleMFRC522
 
 
 class Rfid:
