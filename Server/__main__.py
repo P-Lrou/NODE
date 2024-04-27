@@ -1,4 +1,4 @@
 from WSServer.WSManager import WSManager
 
-wsManager = WSManager.setupVPS()
+wsManager = WSManager.setupLocalhost()
 wsManager.start()

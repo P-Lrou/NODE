@@ -18,3 +18,7 @@ class WSManager:
     @staticmethod
     def setupVPS():
         return WSManager('websocket.rezurrection.website', 8765)
+
+    @staticmethod
+    def setupLocalhost():
+        return WSManager('localhost', 9000)
