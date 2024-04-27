@@ -20,15 +20,6 @@ class IOTManager:
         from rfid.Rfid import Rfid
         rfid_callback = RfidCallback(self.ws_client)
         self.rfid = Rfid(rfid_callback)
-
-        #* Led controller
-        from led.LedController import LEDController
-        self.led_matchmaking = LEDController(pin_numbers=LedPins.instance().matchmaking_number)
-        self.led_activities = LEDController(pin_by_name=LedPins.instance().activities_led_number)
-        self.led_controllers = [
-            self.led_matchmaking,
-            self.led_activities
-        ]
     
     def start(self):
         self.ws_client.start()

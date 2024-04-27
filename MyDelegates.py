@@ -1,4 +1,5 @@
 from GlobalVariables import *
+from MessageHandler import MessageHandler
 
 #* Websocket Client
 from wsclient.WSDelegate import WSDelegate
@@ -6,9 +7,11 @@ from wsclient.WSDelegate import WSDelegate
 class WSClientCallback(WSDelegate):
     def __init__(self) -> None:
         super().__init__()
+        self.message_handler = MessageHandler()
 
     def on_message(self, json_message):
         super().on_message(json_message)
+        self.message_handler.process_message(json_message)
 
 
 #* Rfid reader
