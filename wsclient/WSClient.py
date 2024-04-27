@@ -53,6 +53,6 @@ class WSClient(Thread):
         return WSClient(uri, delegate)
 
     @staticmethod
-    def setupLocalhost(delegate=None):
+    def connectToLocalhost(delegate=None):
         uri = "ws://{ip}:{port}".format(ip="localhost", port=9000)
         return WSClient(uri, delegate)

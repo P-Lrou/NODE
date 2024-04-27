@@ -18,5 +18,5 @@ class MyDelegate(WSDelegate):
         super().on_error(error)
 
 my_delegate = MyDelegate()
-client = WSClient.connectToVPS(my_delegate)
+client = WSClient.connectToLocalhost(my_delegate)
 client.start()
