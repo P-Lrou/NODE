@@ -27,11 +27,10 @@ class MessageHandler:
                     
                     # Notify all current participants that a new player has joined
                     for participant in participants:
-                        if participant["id"] != client["id"]:  # Assuming each 'participant' dict has an 'id'
-                            # Find the client object corresponding to participant['id']
-                            target_client = next((c for c in server.clients if c['id'] == participant["id"]), None)
-                            if target_client:
-                                server.send_message(target_client, new_participant_message)
+                        # Find the client object corresponding to participant['id']
+                        target_client = next((c for c in server.clients if c['id'] == participant["id"]), None)
+                        if target_client:
+                            server.send_message(target_client, new_participant_message)
                         
                     # If the activity is full, inform all participants
                     if self.activitiesManager.check_activity_full(activity_id):

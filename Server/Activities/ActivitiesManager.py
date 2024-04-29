@@ -11,18 +11,13 @@ class ActivitiesManager:
             with open("activities.json", "r") as file:
                 self.activities = json.load(file)
         except FileNotFoundError:
-            self.activities = {
-                "sewing": {"required_participants": 4, "participants": []},
-                "poker": {"required_participants": 6, "participants": []},
-                "chess": {"required_participants": 2, "participants": []}
-            }
-            self.save_activities()
+            self.reset_activities()
 
     def reset_activities(self):
         self.activities = {
-            "sewing": {"required_participants": 4, "participants": []},
-            "poker": {"required_participants": 6, "participants": []},
-            "chess": {"required_participants": 2, "participants": []}
+            "belotte": {"required_participants": 4, "participants": []},
+            "scrabble": {"required_participants": 4, "participants": []},
+            "echecs": {"required_participants": 2, "participants": []}
         }
         self.save_activities() 
 
