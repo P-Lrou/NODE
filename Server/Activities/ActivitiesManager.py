@@ -23,12 +23,21 @@ class ActivitiesManager:
 
     def save_activities(self):
         with open("activities.json", "w") as file:
-            json.dump(self.activities, file)
+            json.dump(self.activities, file, indent=4)
 
-    def handle_activity(self, data, client):
+    def add_participant(self, data, client):
         activity_type = data.get('activity_type')
         if activity_type in self.activities:
             self.activities[activity_type]['participants'].append(
+                {"id": client['id'], "uid": client["uid"]})
+            self.save_activities()
+            return activity_type
+        return None
+    
+    def remove_participant(self, data, client):
+        activity_type = data.get('activity_type')
+        if activity_type in self.activities:
+            self.activities[activity_type]['participants'].remove(
                 {"id": client['id'], "uid": client["uid"]})
             self.save_activities()
             return activity_type
