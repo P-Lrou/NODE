@@ -1,5 +1,6 @@
 from GlobalVariables import *
 from MessageHandler import MessageHandler
+import json
 
 #* Websocket Client
 from wsclient.WSDelegate import WSDelegate
@@ -29,7 +30,11 @@ class RfidCallback(RfidDelegate):
             for activity in activities:
                 if rfid_data["text"].startswith(activity):
                     if self.ws_client is not None:
-                        self.ws_client.send_message(activity)
+                        data = {
+                            "type": "activity",
+                            "activity_type": activity
+                        }
+                        self.ws_client.send_message(json.dumps(data))
                     else:
                         print("Error: Fail to send message")
                     break

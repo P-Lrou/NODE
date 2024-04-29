@@ -12,22 +12,24 @@ class MessageHandler:
         if "type" in json_message:
             if json_message["type"] == "activity_created":
                 activity = json_message["activity_type"]
-                self.led_activities.on(activity)
+                self.led_activities.on_name(activity)
             elif json_message["type"] == "new_participant":
                 last_number_participant = self.led_matchmaking.counter
                 actual_number_participant = json_message["count"]
                 loop_number = abs(last_number_participant - actual_number_participant)
+                print(loop_number)
                 if actual_number_participant > last_number_participant:
-                    for i in range(1, loop_number):
-                        self.led_matchmaking.on()
+                    for i in range(0, loop_number):
+                        self.led_matchmaking.on_next()
                 elif actual_number_participant < last_number_participant:
-                    for i in range(1, loop_number):
-                        self.led_matchmaking.off()
+                    for i in range(0, loop_number):
+                        self.led_matchmaking.off_next()
                 else:
                     print("Good participant number")
             elif json_message["type"] == "activity_full":
                 activity = json_message["activity_type"]
                 print(f"Printing of {activity} result...")
+                self.led_matchmaking.clignotment()
             else:
                 print("Error: Unknown type")
         else:

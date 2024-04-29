@@ -1,4 +1,3 @@
-from multipledispatch import dispatch
 from led.Led import Led
 import time
 
@@ -45,7 +44,7 @@ class LEDController:
                         for name in pin_by_name:
                             led = Led(pin_by_name[name])
                             self.leds.append(led)
-                            self.leds_by_pin = pin_by_name
+                            self.leds_by_pin[name] = led
                     else:
                         print("Error: pin_by_name is empty")
                 else:
@@ -59,15 +58,13 @@ class LEDController:
             led.off()
             time.sleep(0.7)
 
-    @dispatch()
-    def on(self):
+    def on_next(self):
         led = self.leds[self.counter]
         led.on()
         if self.counter < len(self.leds)-1:
             self.counter += 1
     
-    @dispatch(int)
-    def on(self, pin_number):
+    def on_int(self, pin_number):
         if self.key_type == int:
             if pin_number in self.leds_by_pin:
                 led = self.leds_by_pin[pin_number]
@@ -77,8 +74,7 @@ class LEDController:
         else:
             print("Error: leds have been instanciated by int keys")
     
-    @dispatch(str)
-    def on(self, pin_name):
+    def on_name(self, pin_name):
         if self.key_type == str:
             if pin_name in self.leds_by_pin:
                 led = self.leds_by_pin[pin_name]
@@ -88,15 +84,13 @@ class LEDController:
         else:
             print("Error: leds have been instanciated by string keys")
 
-    @dispatch()
-    def off(self):
+    def off_next(self):
         led = self.leds[self.counter]
         led.off()
         if self.counter > 0:
             self.counter -= 1
 
-    @dispatch(int)
-    def off(self, pin_number):
+    def off_int(self, pin_number):
         if self.key_type == int:
             if pin_number in self.leds_by_pin:
                 led = self.leds_by_pin[pin_number]
@@ -106,8 +100,7 @@ class LEDController:
         else:
             print("Error: leds have been instanciated by int keys")
     
-    @dispatch(str)
-    def off(self, pin_name):
+    def off_name(self, pin_name):
         if self.key_type == str:
             if pin_name in self.leds_by_pin:
                 led = self.leds_by_pin[pin_name]
@@ -128,3 +121,12 @@ class LEDController:
     def all_off(self):
         for led in self.leds:
             led.off()
+
+    def clignotment(self):
+        for i in range(0, 5):
+            for led in self.leds:
+                led.off()
+                time.sleep(0.3)
+            for led in self.leds:
+                led.on()
+                time.sleep(0.3)
