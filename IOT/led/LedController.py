@@ -74,7 +74,7 @@ class LEDController:
         else:
             DLog.LogError("leds have been instanciated by string keys")
 
-    def off_next(self):
+    def off_previous(self):
         led = self.leds[self.counter]
         led.off()
         if self.counter > 0:
