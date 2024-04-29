@@ -1,5 +1,6 @@
 from GlobalVariables import *
-from MessageHandler import MessageHandler
+from message.MessageHandler import MessageHandler
+from tools.DLog import DLog
 import json
 
 #* Websocket Client
@@ -22,6 +23,7 @@ class RfidCallback(RfidDelegate):
     def __init__(self, ws_client=None) -> None:
         super().__init__()
         self.ws_client = ws_client
+        self.last_activity = None
     
     def rfid_placed(self, rfid_data):
         super().rfid_placed(rfid_data)
@@ -29,15 +31,26 @@ class RfidCallback(RfidDelegate):
         if rfid_data["text"] in activities:
             for activity in activities:
                 if rfid_data["text"].startswith(activity):
+                    self.last_activity = activity
                     if self.ws_client is not None:
                         data = {
                             "type": "activity",
-                            "activity_type": activity
+                            "activity_type": activity,
+                            "state": "joined"
                         }
                         self.ws_client.send_message(json.dumps(data))
                     else:
-                        print("Error: Fail to send message")
+                        DLog.LogError("Fail to send message")
                     break
 
     def rfid_removed(self):
         super().rfid_removed()
+        if self.ws_client is not None:
+            data = {
+                "type": "activity",
+                "activity_type": self.last_activity,
+                "state": "retired"
+            }
+            self.ws_client.send_message(json.dumps(data))
+        else:
+            DLog.LogError("Fail to send message")
