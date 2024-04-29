@@ -17,9 +17,9 @@ class MessageHandler:
                     if activity_type:
                         is_new_activity = not self.activitiesManager.activity_exists(activity_type)
                         if "state" in data_content:
-                            if data_content == "joined":
+                            if data_content["state"] == "joined":
                                 activity_id = self.activitiesManager.add_participant(data_content, client)
-                            elif data_content == "retired":
+                            elif data_content["state"] == "retired":
                                 activity_id = self.activitiesManager.remove_participant(data_content, client)
                             else:
                                 DLog.LogError("Unknown state")
