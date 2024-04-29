@@ -1,3 +1,4 @@
+from tools.DLog import DLog
 
 class LedPins:
     _instance = None
@@ -11,7 +12,7 @@ class LedPins:
             for i in range(0, len(activities)):
                 self.activities_led_number[activities[i]] = self.activities_number[i]
         else:
-            print("No matching length between activities_number and activities")
+            DLog.LogError("No matching length between activities_number and activities")
 
     @classmethod
     def instance(cls):

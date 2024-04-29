@@ -1,5 +1,6 @@
 from GlobalVariables import *
 from MyDelegates import *
+from tools.DLog import DLog
 import RPi.GPIO as GPIO
 
 class IOTManager:
@@ -27,4 +28,4 @@ class IOTManager:
             while True:
                 self.rfid.process()
         except KeyboardInterrupt:
-            print("End of the program")
+            DLog.Log("End of the program")
