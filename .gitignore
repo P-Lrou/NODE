@@ -126,4 +126,4 @@ coverage/
 *.wav
 
 # Data file
-activities.json
+Server/activities.json
