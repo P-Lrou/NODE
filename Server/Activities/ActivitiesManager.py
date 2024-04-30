@@ -1,6 +1,5 @@
 import json
 
-
 class ActivitiesManager:
     def __init__(self):
         self.activities = {}
@@ -25,23 +24,21 @@ class ActivitiesManager:
         with open("activities.json", "w") as file:
             json.dump(self.activities, file, indent=4)
 
-    def add_participant(self, data, client):
-        activity_type = data.get('activity_type')
+    def add_participant(self, activity_type, client):
         if activity_type in self.activities:
             self.activities[activity_type]['participants'].append(
                 {"id": client['id'], "uid": client["uid"]})
             self.save_activities()
-            return activity_type
-        return None
+            return True
+        return False
     
-    def remove_participant(self, data, client):
-        activity_type = data.get('activity_type')
+    def remove_participant(self, activity_type, client):
         if activity_type in self.activities:
             self.activities[activity_type]['participants'].remove(
                 {"id": client['id'], "uid": client["uid"]})
             self.save_activities()
-            return activity_type
-        return None
+            return True
+        return False
 
     def get_participants_count(self, activity_type):
         if activity_type in self.activities:
@@ -51,6 +48,11 @@ class ActivitiesManager:
     def check_activity_full(self, activity_type):
         if activity_type in self.activities:
             return len(self.activities[activity_type]['participants']) >= self.activities[activity_type]['required_participants']
+        return False
+    
+    def check_activity_empty(self, activity_type):
+        if activity_type in self.activities:
+            return len(self.activities[activity_type]['participants']) <= 0
         return False
 
     def get_participants(self, activity_type):
