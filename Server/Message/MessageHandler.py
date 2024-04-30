@@ -17,9 +17,10 @@ class MessageHandler:
                         activity_type = data_content['activity_type']
                         if "state" in data_content:
                             if data_content["state"] == "joined":
+                                is_new_activity = not self.activitiesManager.activity_exists(activity_type)
                                 if self.activitiesManager.add_participant(activity_type, client):
                                     # If this is an new activity
-                                    if not self.activitiesManager.activity_exists(activity_type):
+                                    if is_new_activity:
                                         creation_message = json.dumps({"type": "activity_created", "activity_type": activity_type})
                                         DLog.LogWhisper(f"New activity: {activity_type} => sending: {creation_message}")
                                         for c in server.clients:
@@ -61,12 +62,12 @@ class MessageHandler:
                                     for participant in participants:
                                         target_client = next((c for c in server.clients if c['id'] == participant["id"]), None)
                                         if target_client:
-                                            server.send_message(target_client, new_participant_message)
+                                            server.send_message(target_client, drop_participant_message)
 
                                     # If the activity is empty
                                     if self.activitiesManager.check_activity_empty(activity_type):
                                         empty_message = json.dumps({"type": "activity_empty", "activity_type": activity_type})
-                                        DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
+                                        DLog.LogWhisper(f"Activity {activity_type} is empty => sending: {empty_message}")
                                         for c in server.clients:
                                             server.send_message(c, empty_message)
                                 else:
