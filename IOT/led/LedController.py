@@ -75,10 +75,10 @@ class LEDController:
             DLog.LogError("leds have been instanciated by string keys")
 
     def off_previous(self):
-        led = self.leds[self.counter]
-        led.off()
         if self.counter > 0:
             self.counter -= 1
+        led = self.leds[self.counter]
+        led.off()
 
     def off_int(self, pin_number):
         if self.key_type == int:
@@ -107,10 +107,12 @@ class LEDController:
     def all_on(self):
         for led in self.leds:
             led.on()
+        self.counter = len(self.leds)-1
 
     def all_off(self):
         for led in self.leds:
             led.off()
+        self.counter = 0
 
     def blinking(self):
         for i in range(0, 5):
