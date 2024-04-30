@@ -124,3 +124,6 @@ coverage/
 
 .DS_Store
 *.wav
+
+# Data file
+Server/activities.json

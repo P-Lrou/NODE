@@ -11,38 +11,35 @@ class MessageHandler:
     def process_message(self, json_message):
         if "type" in json_message:
             if json_message["type"] == "activity_created":
-                activity = json_message["activity_type"]
-                self.led_activities.on_name(activity)
+                activity_type = json_message["activity_type"]
+                self.led_activities.on_name(activity_type)
             elif json_message["type"] == "new_participant":
-                last_number_participant = self.led_matchmaking.counter
-                actual_number_participant = json_message["count"]
-                loop_number = abs(last_number_participant - actual_number_participant)
-                if actual_number_participant > last_number_participant:
-                    for i in range(0, loop_number):
-                        self.led_matchmaking.on_next()
-                elif actual_number_participant < last_number_participant:
-                    for i in range(0, loop_number):
-                        self.led_matchmaking.off_previous()
-                else:
-                    DLog.LogWarning("There no change of participant number")
-            elif json_message["type"] == "drop_participant":
                 last_number_participant = self.led_matchmaking.counter
                 actual_number_participant = json_message["count"]
                 loop_number = abs(actual_number_participant - last_number_participant)
                 if actual_number_participant > last_number_participant:
                     for i in range(0, loop_number):
                         self.led_matchmaking.on_next()
-                elif actual_number_participant < last_number_participant:
+                else:
+                    DLog.LogWarning("There is not new participant")
+            elif json_message["type"] == "drop_participant":
+                last_number_participant = self.led_matchmaking.counter
+                actual_number_participant = json_message["count"]
+                loop_number = abs(actual_number_participant - last_number_participant)
+                if actual_number_participant < last_number_participant:
                     for i in range(0, loop_number):
                         self.led_matchmaking.off_previous()
                 else:
-                    DLog.LogWarning("There no change of participant number")
+                    DLog.LogWarning("There is not drop participant")
             elif json_message["type"] == "activity_leave":
                 self.led_matchmaking.all_off()
             elif json_message["type"] == "activity_full":
-                activity = json_message["activity_type"]
-                DLog.LogSuccess(f"DLog.LogErroring of {activity} result...")
+                activity_type = json_message["activity_type"]
+                DLog.LogSuccess(f"DLog.LogErroring of {activity_type} result...")
                 self.led_matchmaking.blinking()
+            elif json_message["type"] == "activity_empty":
+                activity_type = json_message["activity_type"]
+                self.led_activities.off_name(activity_type)
             else:
                 DLog.LogError("Unknown type")
         elif "uid" in json_message:
