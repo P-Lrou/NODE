@@ -21,8 +21,10 @@ class MyDelegate(WSDelegate):
             data = message
             if "uid" in data:
                 self.send_first_data()
+                pass
             if "type" in data:
                 self.send_second_data()
+                pass
         except:
             pass
 
@@ -35,12 +37,13 @@ class MyDelegate(WSDelegate):
     def send_first_data(self):
         if self.ws_client:
             self.ws_client.send_message(
-                ActivitySimulation.add_belotte()
+                ActivitySimulation.add_tarot()
             )
     def send_second_data(self):
+        time.sleep(10)
         if self.ws_client and not self.all_received:
             self.ws_client.send_message(
-                ActivitySimulation.remove_belotte()
+                ActivitySimulation.remove_tarot()
             )
             self.all_received = True
 
