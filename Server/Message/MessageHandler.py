@@ -17,59 +17,68 @@ class MessageHandler:
                         activity_type = data_content['activity_type']
                         if "state" in data_content:
                             if data_content["state"] == "joined":
-                                is_new_activity = not self.activitiesManager.activity_exists(activity_type)
-                                if self.activitiesManager.add_participant(activity_type, client):
-                                    # If this is an new activity
-                                    if is_new_activity:
-                                        creation_message = json.dumps({"type": "activity_created", "activity_type": activity_type})
-                                        DLog.LogWhisper(f"New activity: {activity_type} => sending: {creation_message}")
-                                        for c in server.clients:
-                                            server.send_message(c, creation_message)
-
-                                    # Send data for number of participant
-                                    participants = self.activitiesManager.get_participants(activity_type)
-                                    participants_count = self.activitiesManager.get_participants_count(activity_type)
-                                    new_participant_message = json.dumps({"type": "new_participant", "activity_type": activity_type, "count": participants_count})
-                                    DLog.LogWhisper(f"New participant to {activity_type} => sending: {new_participant_message}")
-                                    for participant in participants:
-                                        target_client = next((c for c in server.clients if c['id'] == participant["id"]), None)
-                                        if target_client:
-                                            server.send_message(target_client, new_participant_message)
-
-                                    # If the activity is full
-                                    if self.activitiesManager.check_activity_full(activity_type):
-                                        complete_message = json.dumps({"type": "activity_full", "activity_type": activity_type})
-                                        DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
+                                room = self.activitiesManager.get_opened_room(activity_type)
+                                # Si aucune room n'est ouverte
+                                if not room:
+                                    room = self.activitiesManager.open_new_room(activity_type)
+                                    creation_message = json.dumps({"type": "activity_created", "activity_type": activity_type})
+                                    DLog.LogWhisper(f"New activity: {activity_type} => sending: {creation_message}")
+                                    for c in server.clients:
+                                        server.send_message(c, creation_message)
+                                if room:
+                                    if self.activitiesManager.add_participant(room, client):
+                                        participants = self.activitiesManager.get_participants(room)
+                                        participants_count = len(participants)
+                                        new_participant_message = json.dumps({"type": "new_participant", "activity_type": activity_type, "count": participants_count})
+                                        DLog.LogWhisper(f"New participant to {activity_type} => sending: {new_participant_message}")
                                         for participant in participants:
-                                            target_client = next((c for c in server.clients if c['id'] == participant["id"]), None)
+                                            target_client = next((c for c in server.clients if c['id'] == participant.id), None)
                                             if target_client:
-                                                server.send_message(target_client, complete_message)
+                                                server.send_message(target_client, new_participant_message)
+                                        
+                                        # If the activity is full
+                                        if participants_count >= room.activity.required_participants:
+                                            complete_message = json.dumps({"type": "activity_full", "activity_type": activity_type})
+                                            DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
+                                            for participant in participants:
+                                                target_client = next((c for c in server.clients if c['id'] == participant.ws_client_id), None)
+                                                if target_client:
+                                                    server.send_message(target_client, complete_message)
+                                    else:
+                                        DLog.LogError("Can't add participant to the activity")
+                                        server.send_message(client, json.dumps({"error": "Can't add participant to the activity"}))
                                 else:
-                                    DLog.LogError("Can't add participant to the activity")
-                                    server.send_message(client, json.dumps({"error": "Can't add participant to the activity"}))
-
+                                    DLog.LogError("Error to find a valid room")
+                                    server.send_message(client, json.dumps({"error": "Error to find a valid room"}))
+                                    
                             elif data_content["state"] == "retired":
                                 if self.activitiesManager.remove_participant(activity_type, client):
+
+                                    # Send leave message to client
                                     leave_message = json.dumps({"type": "activity_leave", "activity_type": activity_type})
                                     DLog.LogWhisper(f"A participant leave the activity {activity_type} => sending: {leave_message}")
                                     server.send_message(client, leave_message)
 
                                     # Send data for number of participant
-                                    participants = self.activitiesManager.get_participants(activity_type)
-                                    participants_count = self.activitiesManager.get_participants_count(activity_type)
-                                    drop_participant_message = json.dumps({"type": "drop_participant", "activity_type": activity_type, "count": participants_count})
-                                    DLog.LogWhisper(f"Drop participant to {activity_type} => sending: {drop_participant_message}")
-                                    for participant in participants:
-                                        target_client = next((c for c in server.clients if c['id'] == participant["id"]), None)
-                                        if target_client:
-                                            server.send_message(target_client, drop_participant_message)
-
-                                    # If the activity is empty
-                                    if self.activitiesManager.check_activity_empty(activity_type):
+                                    room = self.activitiesManager.get_opened_room(activity_type)
+                                    participants = self.activitiesManager.get_participants(room)
+                                    participants_count = len(participants)
+                                    if participants_count <= 0:
                                         empty_message = json.dumps({"type": "activity_empty", "activity_type": activity_type})
                                         DLog.LogWhisper(f"Activity {activity_type} is empty => sending: {empty_message}")
                                         for c in server.clients:
                                             server.send_message(c, empty_message)
+                                        pass
+                                    else:
+                                        drop_participant_message = json.dumps({"type": "drop_participant", "activity_type": activity_type, "count": participants_count})
+                                        DLog.LogWhisper(f"Drop participant to {activity_type} => sending: {drop_participant_message}")
+                                        for participant in participants:
+                                            target_client = next((c for c in server.clients if c['id'] == participant.ws_client_id), None)
+                                            if target_client:
+                                                server.send_message(target_client, drop_participant_message)
+                                        if not self.activitiesManager.delete_room(room):
+                                            DLog.LogError("Error to delete the room")
+                                            server.send_message(client, json.dumps({"error", "Error to delete the room"}))
                                 else:
                                     DLog.LogError("Can't remove participant to the activity")
                                     server.send_message(client, json.dumps({"error": "Can't remove participant to the activity"}))
