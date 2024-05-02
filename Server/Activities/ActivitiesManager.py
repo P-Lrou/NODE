@@ -6,6 +6,8 @@ from Model.Participant import Participant
 
 class ActivitiesManager:
     def __init__(self):
+        Room.truncate_table()
+        Participant.truncate_table()
         pass
     
     def add_participant(self, room_id, client):
@@ -51,7 +53,11 @@ class ActivitiesManager:
     def get_opened_room(self, activity_type):
         activity = Activity.get_activity_by_name(activity_type)
         if activity:
-            return activity.get_opened_rooms()[0]
+            rooms = activity.get_opened_rooms()
+            if len(rooms) > 0:
+                return rooms[0]
+            else:
+                return None
         else:
             DLog.LogError(f"Activity {activity_type} not found")
         return None

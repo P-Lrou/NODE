@@ -5,7 +5,6 @@ import json
 class MessageHandler:
     def __init__(self):
         self.activitiesManager = ActivitiesManager()
-        self.activitiesManager.reset_activities()
 
     def process_message(self, message, server, client):
         data = json.loads(message)
@@ -32,7 +31,7 @@ class MessageHandler:
                                         new_participant_message = json.dumps({"type": "new_participant", "activity_type": activity_type, "count": participants_count})
                                         DLog.LogWhisper(f"New participant to {activity_type} => sending: {new_participant_message}")
                                         for participant in participants:
-                                            target_client = next((c for c in server.clients if c['id'] == participant.id), None)
+                                            target_client = next((c for c in server.clients if c['id'] == participant.ws_client_id), None)
                                             if target_client:
                                                 server.send_message(target_client, new_participant_message)
                                         
@@ -68,7 +67,9 @@ class MessageHandler:
                                         DLog.LogWhisper(f"Activity {activity_type} is empty => sending: {empty_message}")
                                         for c in server.clients:
                                             server.send_message(c, empty_message)
-                                        pass
+                                        if not self.activitiesManager.delete_room(room):
+                                            DLog.LogError("Error to delete the room")
+                                            server.send_message(client, json.dumps({"error", "Error to delete the room"}))
                                     else:
                                         drop_participant_message = json.dumps({"type": "drop_participant", "activity_type": activity_type, "count": participants_count})
                                         DLog.LogWhisper(f"Drop participant to {activity_type} => sending: {drop_participant_message}")
@@ -76,9 +77,6 @@ class MessageHandler:
                                             target_client = next((c for c in server.clients if c['id'] == participant.ws_client_id), None)
                                             if target_client:
                                                 server.send_message(target_client, drop_participant_message)
-                                        if not self.activitiesManager.delete_room(room):
-                                            DLog.LogError("Error to delete the room")
-                                            server.send_message(client, json.dumps({"error", "Error to delete the room"}))
                                 else:
                                     DLog.LogError("Can't remove participant to the activity")
                                     server.send_message(client, json.dumps({"error": "Can't remove participant to the activity"}))
