@@ -1,5 +1,6 @@
 from Rfid import Rfid
 from RfidDelegate import RfidDelegate
+import RPi.GPIO as GPIO
 
 class MyDelegate(RfidDelegate):
     def __init__(self) -> None:
@@ -8,7 +9,8 @@ class MyDelegate(RfidDelegate):
         self.activities = [
             "belotte",
             "echecs",
-            "scrabble"
+            "scrabble",
+            "tarot"
         ]
         self.actual_activities = 0
         self.writing = False
@@ -64,4 +66,4 @@ try:
     while True:
         rfid.process()
 except KeyboardInterrupt:
-    pass
+    GPIO.cleanup()
