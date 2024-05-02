@@ -92,3 +92,21 @@ class ActivitySimulation:
             ActivityBuilder.set_activity("echecs")
         )
         return json.dumps(data)
+    
+    @staticmethod
+    def add_tarot():
+        data = ActivityBuilder.merge_data(
+            ActivityBuilder.type(),
+            ActivityBuilder.add_state(),
+            ActivityBuilder.set_activity("tarot")
+        )
+        return json.dumps(data)
+    
+    @staticmethod
+    def remove_tarot():
+        data = ActivityBuilder.merge_data(
+            ActivityBuilder.type(),
+            ActivityBuilder.remove_state(),
+            ActivityBuilder.set_activity("tarot")
+        )
+        return json.dumps(data)
