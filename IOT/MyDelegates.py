@@ -1,7 +1,6 @@
 from GlobalVariables import *
 from message.MessageHandler import MessageHandler
 from tools.DLog import DLog
-from tools.Sound import PlaySound
 import json
 
 #* Websocket Client
@@ -40,7 +39,6 @@ class RfidCallback(RfidDelegate):
                             "state": "joined"
                         }
                         self.ws_client.send_message(json.dumps(data))
-                        PlaySound.join()
                     else:
                         DLog.LogError("Fail to send message")
                     break
@@ -54,6 +52,5 @@ class RfidCallback(RfidDelegate):
                 "state": "retired"
             }
             self.ws_client.send_message(json.dumps(data))
-            PlaySound.leave()
         else:
             DLog.LogError("Fail to send message")
