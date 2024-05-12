@@ -21,11 +21,16 @@ class IOTManager:
         from rfid.Rfid import Rfid
         rfid_callback = RfidCallback(self.ws_client)
         self.rfid = Rfid(rfid_callback)
+
+        from MyButton import *
+        self.button = MyButton(18, self.ws_client)
+
     
     def start(self):
         self.ws_client.start()
         try:
             while True:
                 self.rfid.process()
+                self.button.process()
         except KeyboardInterrupt:
             DLog.Log("End of the program")
