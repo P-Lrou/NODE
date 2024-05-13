@@ -5,7 +5,7 @@ class LedPins:
 
     def __init__(self):
         self.matchmaking_number = [6, 13, 19, 26]
-        self.activities_number = [17, 27, 22, 23]
+        self.activities_number = [17, 27, 22, 23, 5, 0]
         self.activities_led_number = {}
         activities = Activities.instance().activities
         if len(self.activities_number) == len(activities):
@@ -29,7 +29,9 @@ class Activities:
             "belotte",
             "echecs",
             "scrabble",
-            "tarot"
+            "tarot",
+            "bridge",
+            "balade"
         ]
 
     @classmethod
