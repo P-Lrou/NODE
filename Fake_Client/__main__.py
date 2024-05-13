@@ -23,6 +23,7 @@ class MyDelegate(WSDelegate):
             self.has_sending = True
             for data in data_to_send:
                 self.ws_client.send_message(data)
+                time.sleep(self.sending_delta)
 
     def on_close(self):
         super().on_close()
