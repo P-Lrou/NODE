@@ -54,3 +54,16 @@ class RfidCallback(RfidDelegate):
             self.ws_client.send_message(json.dumps(data))
         else:
             DLog.LogError("Fail to send message")
+
+
+#* Rfid reader
+from button.ButtonDelegate import ButtonDelegate
+
+class ButtonCallback(ButtonDelegate):
+    def __init__(self, ws_client=None) -> None:
+        super().__init__()
+        self.ws_client = ws_client
+
+    def on_clicked(self, button) -> None:
+        super().on_clicked(button)
+        self.ws_client.send_message(json.dumps(button.get_data()))

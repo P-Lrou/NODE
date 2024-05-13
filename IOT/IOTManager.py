@@ -22,8 +22,9 @@ class IOTManager:
         rfid_callback = RfidCallback(self.ws_client)
         self.rfid = Rfid(rfid_callback)
 
-        from MyButton import *
-        self.button = MyButton(18, self.ws_client)
+        from button.MyButton import MyButton
+        button_callback = ButtonCallback(self.ws_client)
+        self.button = MyButton(18, "belotte", button_callback)
 
     
     def start(self):
