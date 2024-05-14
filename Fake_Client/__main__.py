@@ -32,10 +32,10 @@ class MyDelegate(WSDelegate):
         super().on_error(error)
 
 data_to_send = [
-    ActivitySimulation.add_bridge(),
-    ActivitySimulation.remove_bridge()
+    ActivitySimulation.add_belote()
 ]
 my_delegate = MyDelegate(data_to_send)
-client = WSClient.connectToVPS(my_delegate)
+client = WSClient.connectToLocalhost(my_delegate)
+# client = WSClient.connectToVPS(my_delegate)
 my_delegate.set_ws_client(client)
 client.start()

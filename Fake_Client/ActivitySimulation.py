@@ -40,20 +40,20 @@ class ActivitySimulation:
         pass
 
     @staticmethod
-    def add_belotte():
+    def add_belote():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("belotte")
+            ActivityBuilder.set_activity("belote")
         )
         return json.dumps(data)
     
     @staticmethod
-    def remove_belotte():
+    def remove_belote():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("belotte")
+            ActivityBuilder.set_activity("belote")
         )
         return json.dumps(data)
     
@@ -76,73 +76,73 @@ class ActivitySimulation:
         return json.dumps(data)
     
     @staticmethod
-    def add_echecs():
+    def add_gouter():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("echecs")
+            ActivityBuilder.set_activity("gouter")
         )
         return json.dumps(data)
     
     @staticmethod
-    def remove_echecs():
+    def remove_gouter():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("echecs")
+            ActivityBuilder.set_activity("gouter")
         )
         return json.dumps(data)
     
     @staticmethod
-    def add_tarot():
+    def add_promenade():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("tarot")
+            ActivityBuilder.set_activity("promenade")
         )
         return json.dumps(data)
     
     @staticmethod
-    def remove_tarot():
+    def remove_promenade():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("tarot")
+            ActivityBuilder.set_activity("promenade")
         )
         return json.dumps(data)
     
     @staticmethod
-    def add_bridge():
+    def add_petanque():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("bridge")
+            ActivityBuilder.set_activity("petanque")
         )
         return json.dumps(data)
     
     @staticmethod
-    def remove_bridge():
+    def remove_petanque():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("bridge")
+            ActivityBuilder.set_activity("petanque")
         )
         return json.dumps(data)
     
     @staticmethod
-    def add_balade():
+    def add_triomino():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("balade")
+            ActivityBuilder.set_activity("triomino")
         )
         return json.dumps(data)
     
     @staticmethod
-    def remove_balade():
+    def remove_triomino():
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("balade")
+            ActivityBuilder.set_activity("triomino")
         )
         return json.dumps(data)
