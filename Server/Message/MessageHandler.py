@@ -36,7 +36,7 @@ class MessageHandler:
                                                 server.send_message(target_client, new_participant_message)
                                         
                                         # If the activity is full
-                                        if participants_count >= room.activity.required_participants:
+                                        if participants_count >= room.activity.max_participants:
                                             complete_message = json.dumps({"type": "activity_full", "activity_type": activity_type})
                                             DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
                                             for participant in participants:

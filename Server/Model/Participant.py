@@ -6,7 +6,7 @@ class Participant(BaseModel):
     id = IntegerField(primary_key=True)
     ws_client_id = IntegerField()
     uid = CharField()
-    room = ForeignKeyField(Room, backref='participants')
+    room:Room = ForeignKeyField(Room, backref='participants')
 
     class Meta:
         table_name = 'participants'
@@ -23,7 +23,7 @@ class Participant(BaseModel):
         return None
 
     @classmethod
-    def get_participants_by_uid(cls, uid):
+    def get_participants_by_uid(cls, uid) -> list:
         if uid:
             return cls.select().where(cls.uid == uid)
         else:
@@ -31,7 +31,20 @@ class Participant(BaseModel):
             return []
     
     @classmethod
-    def get_participants_by_ws_client_id(cls, ws_client_id):
+    def get_participants_by_room_and_uid(cls, room, uid) -> list:
+        if uid:
+            return (cls
+                    .select()
+                    .where(
+                    (cls.room == room) &
+                    (cls.uid == uid)
+                ))
+        else:
+            DLog.LogError("UID is require")
+            return []
+    
+    @classmethod
+    def get_participants_by_ws_client_id(cls, ws_client_id) -> list:
         if ws_client_id:
             return cls.select().where(cls.ws_client_id == ws_client_id)
         else:

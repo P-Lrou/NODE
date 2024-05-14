@@ -1,4 +1,6 @@
-from WSServer.WSManager import WSManager
 
-wsManager = WSManager.setupVPS()
-wsManager.start()
+#* The main manager
+from ServerManager import ServerManager
+server_manager = ServerManager()
+server_manager.start()
+del server_manager
