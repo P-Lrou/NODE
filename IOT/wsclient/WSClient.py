@@ -13,14 +13,14 @@ class WSClient(Thread):
                                          on_error=self.on_error,
                                          on_close=self.on_close)
         self.connected = False
-        self.id = None
+        self.uid = None
 
     def run(self):
         self.ws.run_forever()
 
     def send_message(self, text):
         message = {
-            "id": self.id,
+            "uid": self.uid,
             "text": text
         }
         print(f"Sending message: {message}")
@@ -34,7 +34,7 @@ class WSClient(Thread):
     def on_message(self, ws, message):
         json_message = json.loads(message)
         if "uid" in json_message:
-            self.id = json_message["uid"]
+            self.uid = json_message["uid"]
         if self.delegate:
             self.delegate.on_message(json_message)
 
