@@ -26,7 +26,7 @@ class MessageHandler:
                                         server.send_message(c, creation_message)
                                 if room:
                                     if self.activitiesManager.add_participant(room, client):
-                                        participants = self.activitiesManager.get_participants(room)
+                                        participants = self.activitiesManager.get_participants_by_room(room)
                                         participants_count = len(participants)
                                         new_participant_message = json.dumps({"type": "new_participant", "activity_type": activity_type, "count": participants_count})
                                         DLog.LogWhisper(f"New participant to {activity_type} => sending: {new_participant_message}")
@@ -51,7 +51,7 @@ class MessageHandler:
                                     server.send_message(client, json.dumps({"error": "Error to find a valid room"}))
                                     
                             elif data_content["state"] == "retired":
-                                if self.activitiesManager.remove_participant(activity_type, client):
+                                if self.activitiesManager.remove_participant_by_activity_type(activity_type, client):
 
                                     # Send leave message to client
                                     leave_message = json.dumps({"type": "activity_leave", "activity_type": activity_type})
@@ -60,7 +60,7 @@ class MessageHandler:
 
                                     # Send data for number of participant
                                     room = self.activitiesManager.get_opened_room(activity_type)
-                                    participants = self.activitiesManager.get_participants(room)
+                                    participants = self.activitiesManager.get_participants_by_room(room)
                                     participants_count = len(participants)
                                     if participants_count <= 0:
                                         empty_message = json.dumps({"type": "activity_empty", "activity_type": activity_type})
@@ -98,3 +98,28 @@ class MessageHandler:
         else:
             DLog.LogError("There is not 'text' key in this message")
             server.send_message(client, json.dumps({"error": "There is not 'text' key in this message"}))
+
+    def process_disconnection(self, server, client):
+        disconnected_participants = self.activitiesManager.get_participant_by_uid(client)
+        for disconnected_participant in disconnected_participants:
+            room = disconnected_participant.room
+            if room.is_opened():
+                # Send data for number of participant
+                participants = self.activitiesManager.get_participants_by_room(room)
+                participants_count = len(participants)
+                if participants_count <= 0:
+                    empty_message = json.dumps({"type": "activity_empty", "activity_type": room.activity.name})
+                    DLog.LogWhisper(f"Activity {room.activity.name} is empty => sending: {empty_message}")
+                    for c in server.clients:
+                        server.send_message(c, empty_message)
+                    if not self.activitiesManager.delete_room(room):
+                        DLog.LogError("Error to delete the room")
+                        server.send_message(client, json.dumps({"error", "Error to delete the room"}))
+                else:
+                    drop_participant_message = json.dumps({"type": "drop_participant", "activity_type": room.activity.name, "count": participants_count})
+                    DLog.LogWhisper(f"Drop participant to {room.activity.name} => sending: {drop_participant_message}")
+                    for participant in participants:
+                        target_client = next((c for c in server.clients if c['id'] == participant.ws_client_id), None)
+                        if target_client:
+                            server.send_message(target_client, drop_participant_message)
+        self.activitiesManager.remove_participant(client)

@@ -21,7 +21,17 @@ class ActivitiesManager:
             DLog.LogError(f"Room not found")
         return False
     
-    def remove_participant(self, activity_type, client):
+    def remove_participant(self, client):
+        participants = Participant.get_participants_by_uid(client["uid"])
+        if len(participants) > 0:
+            for participant in participants:
+                Participant.delete_by_id(participant)
+            return True
+        else:
+            DLog.LogError(f"Any participant with this uid has found")
+        return False
+    
+    def remove_participant_by_activity_type(self, activity_type, client):
         activity = Activity.get_activity_by_name(activity_type)
         if activity:
             participants = activity.get_participants()
@@ -35,8 +45,12 @@ class ActivitiesManager:
         else:
             DLog.LogError(f"Activity '{activity_type}' not found")
         return False
+    
+    def get_participant_by_uid(self, client):
+        return Participant.get_participants_by_uid(client["uid"])
 
-    def get_participants(self, room_id):
+
+    def get_participants_by_room(self, room_id):
         room = Room.get_or_none(Room.id == room_id)
         if room:
             return room.get_participants()

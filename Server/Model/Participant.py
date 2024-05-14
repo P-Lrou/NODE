@@ -28,7 +28,7 @@ class Participant(BaseModel):
             return cls.select().where(cls.uid == uid)
         else:
             DLog.LogError("UID is require")
-            return None
+            return []
     
     @classmethod
     def get_participants_by_ws_client_id(cls, ws_client_id):
@@ -37,3 +37,5 @@ class Participant(BaseModel):
         else:
             DLog.LogError("Websocket client ID is require")
             return None
+        
+    

@@ -22,4 +22,11 @@ class Room(BaseModel):
         return (Participant
                 .select()
                 .where(Participant.room == self))
+    
+    def is_opened(self):
+        opened_rooms = self.activity.get_opened_rooms()
+        if len(opened_rooms) > 0:
+            return self in opened_rooms
+        else:
+            return False
         
