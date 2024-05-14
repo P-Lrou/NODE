@@ -4,10 +4,12 @@ from ActivitySimulation import ActivitySimulation
 import time, json
 
 class MyDelegate(WSDelegate):
-    def __init__(self) -> None:
+    def __init__(self, data_to_send:list[str] = [], sending_delta:int = 10) -> None:
         super().__init__()
         self.ws_client = None
-        self.all_received = False
+        self.has_sending = False
+        self.data_to_send = data_to_send
+        self.sending_delta = sending_delta
 
     def set_ws_client(self, ws_client):
         self.ws_client = ws_client
@@ -17,16 +19,11 @@ class MyDelegate(WSDelegate):
 
     def on_message(self, message):
         super().on_message(message)
-        try:
-            data = message
-            if "uid" in data:
-                self.send_first_data()
-                pass
-            if "type" in data:
-                self.send_second_data()
-                pass
-        except:
-            pass
+        if not self.has_sending:
+            self.has_sending = True
+            for data in data_to_send:
+                self.ws_client.send_message(data)
+                time.sleep(self.sending_delta)
 
     def on_close(self):
         super().on_close()
@@ -34,20 +31,11 @@ class MyDelegate(WSDelegate):
     def on_error(self, error):
         super().on_error(error)
 
-    def send_first_data(self):
-        if self.ws_client:
-            self.ws_client.send_message(
-                ActivitySimulation.add_tarot()
-            )
-    def send_second_data(self):
-        time.sleep(10)
-        if self.ws_client and not self.all_received:
-            self.ws_client.send_message(
-                ActivitySimulation.remove_tarot()
-            )
-            self.all_received = True
-
-my_delegate = MyDelegate()
+data_to_send = [
+    ActivitySimulation.add_bridge(),
+    ActivitySimulation.remove_bridge()
+]
+my_delegate = MyDelegate(data_to_send)
 client = WSClient.connectToVPS(my_delegate)
 my_delegate.set_ws_client(client)
 client.start()

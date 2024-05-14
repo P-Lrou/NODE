@@ -110,3 +110,39 @@ class ActivitySimulation:
             ActivityBuilder.set_activity("tarot")
         )
         return json.dumps(data)
+    
+    @staticmethod
+    def add_bridge():
+        data = ActivityBuilder.merge_data(
+            ActivityBuilder.type(),
+            ActivityBuilder.add_state(),
+            ActivityBuilder.set_activity("bridge")
+        )
+        return json.dumps(data)
+    
+    @staticmethod
+    def remove_bridge():
+        data = ActivityBuilder.merge_data(
+            ActivityBuilder.type(),
+            ActivityBuilder.remove_state(),
+            ActivityBuilder.set_activity("bridge")
+        )
+        return json.dumps(data)
+    
+    @staticmethod
+    def add_balade():
+        data = ActivityBuilder.merge_data(
+            ActivityBuilder.type(),
+            ActivityBuilder.add_state(),
+            ActivityBuilder.set_activity("balade")
+        )
+        return json.dumps(data)
+    
+    @staticmethod
+    def remove_balade():
+        data = ActivityBuilder.merge_data(
+            ActivityBuilder.type(),
+            ActivityBuilder.remove_state(),
+            ActivityBuilder.set_activity("balade")
+        )
+        return json.dumps(data)
