@@ -1,53 +1,87 @@
 import json
-
+from tools.DLog import DLog
+from Model.Activity import Activity
+from Model.Room import Room
+from Model.Participant import Participant
 
 class ActivitiesManager:
     def __init__(self):
-        self.activities = {}
-        self.load_activities()
-
-    def load_activities(self):
-        try:
-            with open("activities.json", "r") as file:
-                self.activities = json.load(file)
-        except FileNotFoundError:
-            self.reset_activities()
-
-    def reset_activities(self):
-        self.activities = {
-            "belotte": {"required_participants": 4, "participants": []},
-            "scrabble": {"required_participants": 4, "participants": []},
-            "echecs": {"required_participants": 2, "participants": []}
-        }
-        self.save_activities() 
-
-    def save_activities(self):
-        with open("activities.json", "w") as file:
-            json.dump(self.activities, file)
-
-    def handle_activity(self, data, client):
-        activity_type = data.get('activity_type')
-        if activity_type in self.activities:
-            self.activities[activity_type]['participants'].append(
-                {"id": client['id'], "uid": client["uid"]})
-            self.save_activities()
-            return activity_type
-        return None
-
-    def get_participants_count(self, activity_type):
-        if activity_type in self.activities:
-            return len(self.activities[activity_type]['participants'])
-        return 0
-
-    def check_activity_full(self, activity_type):
-        if activity_type in self.activities:
-            return len(self.activities[activity_type]['participants']) >= self.activities[activity_type]['required_participants']
+        Room.truncate_table()
+        Participant.truncate_table()
+        pass
+    
+    def add_participant(self, room_id, client):
+        room = Room.get_or_none(Room.id == room_id)
+        if room:
+            if Participant.insert_participant(client["id"], client["uid"], room):
+                return True
+            else:
+                DLog.LogError("Error when inserting participant")
+        else:
+            DLog.LogError(f"Room not found")
         return False
+    
+    def remove_participant(self, client):
+        participants = Participant.get_participants_by_uid(client["uid"])
+        if len(participants) > 0:
+            for participant in participants:
+                Participant.delete_by_id(participant)
+            return True
+        else:
+            DLog.LogError(f"Any participant with this uid has found")
+        return False
+    
+    def remove_participant_by_activity_type(self, activity_type, client):
+        activity = Activity.get_activity_by_name(activity_type)
+        if activity:
+            participants = activity.get_participants()
+            if len(participants) > 0:
+                for participant in participants:
+                    if participant.uid == client["uid"]:
+                        Participant.delete_by_id(participant)
+                return True
+            else:
+                DLog.LogError(f"Any participant with this uid has found in '{activity_type} activity")
+        else:
+            DLog.LogError(f"Activity '{activity_type}' not found")
+        return False
+    
+    def get_participant_by_uid(self, client):
+        return Participant.get_participants_by_uid(client["uid"])
 
-    def get_participants(self, activity_type):
-        if activity_type in self.activities:
-            return self.activities[activity_type]['participants']
-        return []
 
-    def activity_exists(self, activity_type):
-        return activity_type in self.activities and len(self.activities[activity_type]['participants']) > 0
+    def get_participants_by_room(self, room_id):
+        room = Room.get_or_none(Room.id == room_id)
+        if room:
+            return room.get_participants()
+        else:
+            return []
+    
+    def open_new_room(self, activity_type):
+        activity = Activity.get_activity_by_name(activity_type)
+        if activity:
+            return Room.insert_room(activity)
+        else:
+            return None
+    
+    def get_opened_room(self, activity_type):
+        activity = Activity.get_activity_by_name(activity_type)
+        if activity:
+            rooms = activity.get_opened_rooms()
+            if len(rooms) > 0:
+                return rooms[0]
+            else:
+                return None
+        else:
+            DLog.LogError(f"Activity {activity_type} not found")
+        return None
+    
+    def delete_room(self, room_id):
+        room = Room.get_or_none(Room.id == room_id)
+        if room:
+            Room.delete_by_id(room)
+            return True
+        else:
+            DLog.LogError("Room not found")
+        return False
+            

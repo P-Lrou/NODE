@@ -1,5 +1,6 @@
 from GlobalVariables import *
 from MyDelegates import *
+from tools.DLog import DLog
 import RPi.GPIO as GPIO
 
 class IOTManager:
@@ -20,11 +21,18 @@ class IOTManager:
         from rfid.Rfid import Rfid
         rfid_callback = RfidCallback(self.ws_client)
         self.rfid = Rfid(rfid_callback)
+
+        from button.MyButton import MyButton
+        button_callback = ButtonCallback(self.ws_client)
+        self.button = MyButton(18, "belotte", button_callback)
+
     
     def start(self):
         self.ws_client.start()
         try:
             while True:
-                self.rfid.process()
+                if self.ws_client.connected:
+                    self.rfid.process()
+                    self.button.process()
         except KeyboardInterrupt:
-            print("End of the program")
+            DLog.Log("End of the program")

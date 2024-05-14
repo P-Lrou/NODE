@@ -28,9 +28,9 @@ class WSServer:
                 DLog.LogWarning(
                     f"Client {client['id']} -> {self.current_users[index]['uid']} disconnected")
                 self.current_users.pop(index)
+                self.messageHandler.process_disconnection(server, client)
                 return
         DLog.LogWarning(f"Client {client['id']} disconnected")
-
     def handle_message(self, client, server, message):
         DLog.Log(f"Received message from {client['id']}: {message}")
         self.messageHandler.process_message(message, server, client)
