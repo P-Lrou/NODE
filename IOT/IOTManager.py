@@ -31,7 +31,8 @@ class IOTManager:
         self.ws_client.start()
         try:
             while True:
-                self.rfid.process()
-                self.button.process()
+                if self.ws_client.connected:
+                    self.rfid.process()
+                    self.button.process()
         except KeyboardInterrupt:
             DLog.Log("End of the program")

@@ -1,5 +1,5 @@
 import RPi.GPIO as GPIO
-import json
+from tools.DLog import DLog
 
 class MyButton:
     def __init__(self, pin:int, activity_type: str, delegate=None):
@@ -11,8 +11,9 @@ class MyButton:
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     
     def process(self):
-        input_state = GPIO.input(self.pin)
+        input_state = GPIO.input(self.pin) == GPIO.LOW
         if input_state and not self.button_pressed:
+            self.has_joined = not self.has_joined
             if self.delegate:
                 self.delegate.on_clicked(self)
         self.button_pressed = input_state
