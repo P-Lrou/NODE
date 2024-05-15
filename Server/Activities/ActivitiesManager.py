@@ -1,6 +1,6 @@
 # TOOLS
 from tools.DLog import DLog
-from tools.JSONManager import *
+from tools.JSONTools import *
 # MODEL
 from Model.Activity import Activity
 from Model.Room import Room

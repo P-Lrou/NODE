@@ -1,6 +1,6 @@
 # TOOLS
 from tools.DLog import DLog
-from tools.JSONManager import *
+from tools.JSONTools import *
 # WEBSOCKET SERVER
 from WSServer.WSServerDelegate import WSServerDelegate
 from WSServer.ClientHandler import ClientHandler

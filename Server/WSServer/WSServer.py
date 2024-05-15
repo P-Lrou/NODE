@@ -1,5 +1,5 @@
 from tools.DLog import DLog
-from tools.JSONManager import *
+from tools.JSONTools import *
 from websocket_server import WebsocketServer
 import uuid
 

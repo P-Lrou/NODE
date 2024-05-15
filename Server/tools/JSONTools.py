@@ -1,7 +1,7 @@
 from tools.DLog import DLog
-import json
 
 def json_decode(data: str) -> dict:
+    import json
     try:
         return json.loads(data)
     except json.JSONDecodeError:
@@ -9,6 +9,7 @@ def json_decode(data: str) -> dict:
         return None
     
 def json_encode(data: dict) -> str:
+    import json
     try:
         return json.dumps(data)
     except json.JSONDecodeError:
