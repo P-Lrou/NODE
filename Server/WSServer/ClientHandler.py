@@ -5,7 +5,7 @@ class ClientHandler:
     def __init__(self) -> None:
         pass
 
-    def process_message(self, data:dict) -> dict:
+    def process_message(self, data: dict):
         if "client_id" in data:
             if "type" in data:
                 type = data["type"] 
@@ -25,17 +25,20 @@ class ClientHandler:
                     message_error = f"Unknwon type: {type}"
             else:
                 message_error = "No 'type' key in data"
+            data_to_send = [{
+                "targets": [data["client_id"]],
+                "message": message_error
+            }]
         else:
             message_error = "Client ID is missing"
+            data_to_send = {"error": message_error}
 
-        if not message_error:
-            message_error = "THERE IS A BIG ERROR"
         DLog.LogError(message_error)
-        return {'error':message_error}
+        return data_to_send
             
             
 
-    def process_disconnection(self, client) -> dict:
+    def process_disconnection(self, client) -> list[dict]:
         return ActivitiesManager.drop_participant_by_client(client)
 
 

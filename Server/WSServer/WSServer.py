@@ -1,7 +1,6 @@
 from tools.DLog import DLog
-from Message.MessageHandler import MessageHandler
+from tools.JSONManager import *
 from websocket_server import WebsocketServer
-import json
 import uuid
 
 
@@ -19,7 +18,7 @@ class WSServer:
             uid = str(uuid.uuid4())
         self.current_users.append({"client": client['id'], "uid": uid})
         client['uid'] = uid
-        welcome_message = json.dumps({"uid": uid})
+        welcome_message = json_encode({"uid": uid})
         DLog.LogWhisper(f"New Client : {uid}")
         server.send_message(client, welcome_message)
         if self.delegate:
@@ -35,7 +34,7 @@ class WSServer:
                 return
         DLog.LogWarning(f"Client {client['id']} disconnected")
 
-    def handle_message(self, client, server, message):
+    def handle_message(self, client, server, message: str):
         DLog.Log(f"Received message from {client['id']}: {message}")
         if self.delegate:
             self.delegate.received_message(client, server, message)
@@ -48,13 +47,16 @@ class WSServer:
         self.server.set_fn_client_left(self.handle_client_left)
         self.server.run_forever()
 
-    def send_messages(self, messages):
-        self.delegate.send_messages(self.server, messages)
+    def shutdown_gracefully(self):
+        DLog.Log("Shutting down WebSocket server gracefully...")
+        if self.server:
+            self.server.close()
+        DLog.Log("WebSocket server shut down.")
 
     @staticmethod
-    def setupVPS(delegate=None):
+    def setup_VPS(delegate=None):
         return WSServer('websocket.rezurrection.website', 8765, delegate)
 
     @staticmethod
-    def setupLocalhost(delegate=None):
+    def setup_localhost(delegate=None):
         return WSServer('localhost', 9000, delegate)
