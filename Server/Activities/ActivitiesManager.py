@@ -2,14 +2,26 @@
 from tools.DLog import DLog
 from tools.JSONTools import *
 # MODEL
+from Model.BaseModel import BaseModel
 from Model.Activity import Activity
 from Model.Room import Room
 from Model.Participant import Participant
 
 class ActivitiesManager:
     def __init__(self):
-        Room.truncate_table()
-        Participant.truncate_table()
+        self.tables: list[BaseModel] = [
+            Activity,
+            Room,
+            Participant
+        ]
+        self.tables_to_reset: list[BaseModel] = [
+            Room,
+            Participant
+        ]
+
+    def reset_database(self):
+        for table in self.tables_to_reset:
+            table.truncate_table()
 
     @staticmethod
     def new_participant(data: dict) -> list[dict]:
@@ -62,7 +74,7 @@ class ActivitiesManager:
                     else:
                         message_error = "Error to find a valid room"
                 else:
-                    message_error = f"No {data["activity_type"]} activity found"
+                    message_error = f"No {data['activity_type']} activity found"
             else:
                 message_error = "No 'client_uid' key in data"
         else:
@@ -125,7 +137,7 @@ class ActivitiesManager:
                     else:
                         message_error = "Error to find a valid room"
                 else:
-                    message_error = f"No {data["activity_type"]} activity found"
+                    message_error = f"No {data['activity_type']} activity found"
             else:
                 message_error = "No 'client_uid' key in data"
         else:
@@ -180,8 +192,7 @@ class ActivitiesManager:
         DLog.LogError(message_error)
         return data_to_send
 
-    @staticmethod
-    def check_room_waiting_time(callback):
+    def check_room_waiting_time(self, callback):
         data_to_send: list[dict] = []
         rooms: list[Room] = Room.get_opened_rooms()
         for room in rooms:
@@ -197,3 +208,10 @@ class ActivitiesManager:
                 DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
         if len(data_to_send) > 0:
             callback(data_to_send)
+
+
+    def test(self) -> bool:
+        for table in self.tables:
+            if not table.test_connection():
+                return False
+        return True
