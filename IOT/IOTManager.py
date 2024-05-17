@@ -1,7 +1,10 @@
 from GlobalVariables import *
 from MyDelegates import *
 from tools.DLog import DLog
+from tools.LedDisplayer import LedDisplayer
 import RPi.GPIO as GPIO
+import sys
+import time
 
 class IOTManager:
     def __del__(self):
@@ -26,9 +29,29 @@ class IOTManager:
         button_callback = ButtonCallback(self.ws_client)
         self.button = MyButton(18, "belotte", button_callback)
 
-    
-    def start(self):
+    def run_checks(self):
         self.ws_client.start()
+        LedDisplayer.setup()
+        LedDisplayer.new_test_sequence()
+        if self.rfid.process_checker():
+            LedDisplayer.test_passed()
+        else:
+            LedDisplayer.test_failed()
+            LedDisplayer.cleanup()
+            sys.exit()
+
+        
+        LedDisplayer.new_test_sequence()
+        time.sleep(2)
+        if self.ws_client.connected:
+            LedDisplayer.test_passed()
+        else:
+            LedDisplayer.test_failed()
+            LedDisplayer.cleanup()
+            sys.exit()
+            
+
+    def start(self):
         try:
             while True:
                 if self.ws_client.connected:

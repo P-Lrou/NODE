@@ -1,7 +1,8 @@
 from rfid.mfrc522 import SimpleMFRC522
+from checker.CheckerInterface import CheckerInterface
+import time
 
-
-class Rfid:
+class Rfid(CheckerInterface):
     def __init__(self, delegate=None) -> None:
         self.delegate = delegate
         self.reader = SimpleMFRC522()
@@ -39,3 +40,15 @@ class Rfid:
                 self.delegate.rfid_has_written(text)
             else:
                 self.delegate.rfid_not_written()
+
+    def process_checker(self):
+            start_time = time.time()
+            try:
+                while time.time() - start_time < 10:
+                    id, text = self.reader.read_no_block()
+                    if id:
+                        return True
+                    time.sleep(0.1)
+            except Exception as e:
+                pass
+            return False
