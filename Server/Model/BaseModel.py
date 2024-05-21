@@ -27,7 +27,12 @@ class BaseModel(Model):
 
     @classmethod
     def get_all(cls):
-        return cls.select()
+        query = cls.select()
+        return cls.query_to_list(query)
+    
+    @staticmethod
+    def query_to_list(query):
+        return [model for model in query]
 
     @classmethod
     def test_connection(cls):
