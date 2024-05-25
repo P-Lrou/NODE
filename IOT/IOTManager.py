@@ -21,19 +21,18 @@ class IOTManager:
         self.ws_client = WSClient.connectToVPS(ws_client_callback)
 
         #* Rfid reader
-        from rfid.Rfid import Rfid
+        from rfid.RfidController import RfidController
         rfid_callback = RfidCallback(self.ws_client)
-        self.rfid = Rfid(rfid_callback)
+        self.rfid_controller = RfidController(rfid_callback)
 
         from button.MyButton import MyButton
         button_callback = ButtonCallback(self.ws_client)
         self.button = MyButton(18, "belotte", button_callback)
 
     def run_checks(self):
-        self.ws_client.start()
         LedDisplayer.setup()
         LedDisplayer.new_test_sequence()
-        if self.rfid.process_checker():
+        if self.rfid_controller.process_checker():
             LedDisplayer.test_passed()
         else:
             LedDisplayer.test_failed()
@@ -53,9 +52,11 @@ class IOTManager:
 
     def start(self):
         try:
+            self.ws_client.start()
+            self.run_checks()
             while True:
                 if self.ws_client.connected:
-                    self.rfid.process()
+                    self.rfid_controller.process()
                     self.button.process()
         except KeyboardInterrupt:
             DLog.Log("End of the program")

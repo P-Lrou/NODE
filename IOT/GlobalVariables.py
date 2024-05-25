@@ -19,6 +19,18 @@ class LedPins:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
+    
+class RfidPins:
+    _instance = None
+
+    def __init__(self) -> None:
+        self.rfid_number = [2, 3, 4]
+
+    @classmethod
+    def instance(cls) -> "RfidPins":
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
 
 
 class Activities:
