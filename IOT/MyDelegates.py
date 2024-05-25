@@ -23,37 +23,47 @@ class RfidCallback(RfidDelegate):
     def __init__(self, ws_client=None) -> None:
         super().__init__()
         self.ws_client = ws_client
-        self.last_activity = None
-    
-    def rfid_placed(self, rfid_data):
-        super().rfid_placed(rfid_data)
-        activities = Activities.instance().activities
-        if rfid_data["text"] in activities:
-            for activity in activities:
-                if rfid_data["text"].startswith(activity):
-                    self.last_activity = activity
-                    if self.ws_client is not None:
-                        data = {
-                            "type": "activity",
-                            "activity_type": activity,
-                            "state": "joined"
-                        }
-                        self.ws_client.send_message(json.dumps(data))
-                    else:
-                        DLog.LogError("Fail to send message")
-                    break
 
-    def rfid_removed(self):
-        super().rfid_removed()
-        if self.ws_client is not None:
-            data = {
-                "type": "activity",
-                "activity_type": self.last_activity,
-                "state": "retired"
-            }
-            self.ws_client.send_message(json.dumps(data))
+    def define_activity(self, rfid) -> str:
+        if rfid.last_text_read:
+            activities: list[str] = Activities.instance().activities
+            for activity in activities:
+                if rfid.last_text_read.startswith(activity):
+                    return activity
+            DLog.LogError("Unkown activity")
         else:
-            DLog.LogError("Fail to send message")
+            DLog.LogError("No text has been read yet")
+        return None
+    
+    def rfid_placed(self, rfid, rfid_data):
+        super().rfid_placed(rfid, rfid_data)
+        activity = self.define_activity(rfid)
+        DLog.Log(activity)
+        if activity:
+            if self.ws_client is not None:
+                data = {
+                    "type": "activity",
+                    "activity_type": activity,
+                    "state": "request"
+                }
+                self.ws_client.send_message(json.dumps(data))
+            else:
+                DLog.LogError("Fail to send message")
+
+    def rfid_removed(self, rfid):
+        super().rfid_removed(rfid)
+        activity = self.define_activity(rfid)
+        DLog.Log(activity)
+        if activity:
+            if self.ws_client is not None:
+                data = {
+                    "type": "activity",
+                    "activity_type": activity,
+                    "state": "retire"
+                }
+                self.ws_client.send_message(json.dumps(data))
+            else:
+                DLog.LogError("Fail to send message")
 
 
 #* Rfid reader
