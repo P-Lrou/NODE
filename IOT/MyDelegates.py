@@ -1,6 +1,7 @@
 from GlobalVariables import *
 from message.MessageHandler import MessageHandler
 from tools.DLog import DLog
+from tools.Timer import Timer
 import json
 
 #* Websocket Client
@@ -23,6 +24,17 @@ class RfidCallback(RfidDelegate):
     def __init__(self, ws_client=None) -> None:
         super().__init__()
         self.ws_client = ws_client
+        self.timeout_request_seconds = 10
+
+    def __send_data(self, data, is_last: bool = False):
+        if self.ws_client:
+            if data:
+                data["is_last"] = is_last
+                self.ws_client.send_message(json.dumps(data))
+            else:
+                DLog.LogError("There is no data to send")
+        else:
+            DLog.LogError("Fail to send message")
 
     def define_activity(self, rfid) -> str:
         if rfid.last_text_read:
@@ -40,30 +52,25 @@ class RfidCallback(RfidDelegate):
         activity = self.define_activity(rfid)
         DLog.Log(activity)
         if activity:
-            if self.ws_client is not None:
-                data = {
-                    "type": "activity",
-                    "activity_type": activity,
-                    "state": "request"
-                }
-                self.ws_client.send_message(json.dumps(data))
-            else:
-                DLog.LogError("Fail to send message")
+            data = {
+                "type": "activity",
+                "activity_type": activity,
+                "state": "request"
+            }
+            Timer.instance().start(self.timeout_request_seconds, self.__send_data, data)
+
 
     def rfid_removed(self, rfid):
         super().rfid_removed(rfid)
         activity = self.define_activity(rfid)
         DLog.Log(activity)
         if activity:
-            if self.ws_client is not None:
-                data = {
-                    "type": "activity",
-                    "activity_type": activity,
-                    "state": "retire"
-                }
-                self.ws_client.send_message(json.dumps(data))
-            else:
-                DLog.LogError("Fail to send message")
+            data = {
+                "type": "activity",
+                "activity_type": activity,
+                "state": "cancel"
+            }
+            self.__send_data(data)
 
 
 #* Rfid reader

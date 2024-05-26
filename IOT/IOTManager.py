@@ -23,7 +23,7 @@ class IOTManager:
         #* Rfid reader
         from rfid.RfidController import RfidController
         rfid_callback = RfidCallback(self.ws_client)
-        self.rfid_controller = RfidController(rfid_callback)
+        self.rfid_controller = RfidController.instance(rfid_callback)
 
         from button.MyButton import MyButton
         button_callback = ButtonCallback(self.ws_client)
