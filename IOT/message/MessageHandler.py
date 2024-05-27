@@ -1,6 +1,7 @@
 from GlobalVariables import *
 from tools.Timer import Timer
 from tools.Sound import PlaySound
+from tools.Printer import Printer
 from rfid.RfidController import RfidController
 
 class MessageHandler:
@@ -45,7 +46,9 @@ class MessageHandler:
                 self.good_led_activities.on_name(rfid_id)
                 Timer().start(time_light_on_seconds, self.good_led_activities.off_name, rfid_id)
                 #TODO: GENERATE IMAGE
-                #TODO: PRINT IMAGE
+                image_path = "ressources/images/ticket_imprimante.png"
+                # PRINT IMAGE
+                Printer.print(image_path)
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":
                 #TODO: PLAY NOT_FOUND SOUND
