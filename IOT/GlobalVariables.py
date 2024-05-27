@@ -4,9 +4,9 @@ class LedPins:
     _instance = None
 
     def __init__(self):
-        self.trafic_number: list[int] = []
-        self.good_rfid_number: list[int] = []
-        self.error_rfid_number: list[int] = []
+        self.trafic_number: list[int] = [14]
+        self.good_rfid_number: list[int] = [20, 1, 23]
+        self.error_rfid_number: list[int] = [21, 7, 24]
         
         rfid_ids = RfidPins.instance().rfid_number
         if len(self.good_rfid_number) == len(rfid_ids):
@@ -43,12 +43,12 @@ class Activities:
 
     def __init__(self):
         self.activities = [
-            "belotte",
-            "echecs",
+            "belote",
+            "triomino",
             "scrabble",
-            "tarot",
-            "bridge",
-            "balade"
+            "gouter",
+            "petanque",
+            "promenade"
         ]
 
     @classmethod
