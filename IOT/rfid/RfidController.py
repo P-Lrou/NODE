@@ -1,5 +1,4 @@
 from rfid.Rfid import Rfid
-from MyDelegates import RfidCallback
 from GlobalVariables import RfidPins
 import time
 
@@ -21,10 +20,10 @@ class RfidController:
             rfid.process()
             time.sleep(0.001)
 
-    def get_rfid_id_by_text(self, text: str) -> int:
+    def get_rfid_id_by_text(self, text: str) -> str:
         for rfid in self.rfids:
-            if rfid.last_text_read is not None and rfid.last_text_read == text:
-                return rfid.pin
+            if rfid.last_text_read is not None and rfid.last_text_read.startswith(text):
+                return str(rfid.pin)
         return None
 
     def process_checker(self):

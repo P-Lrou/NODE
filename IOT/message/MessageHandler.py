@@ -1,4 +1,5 @@
 from GlobalVariables import *
+from tools.Timer import Timer
 from tools.Sound import PlaySound
 from rfid.RfidController import RfidController
 
@@ -23,7 +24,7 @@ class MessageHandler:
                 # LIGHT ON ACTIVITY LEDS
                 activity_type = json_message["activity_type"]
                 rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
-                self.good_led_activities.on_name(str(rfid_id))
+                self.good_led_activities.on_name(rfid_id)
                 pass
             elif json_message["type"] == "leave":
                 # PLAY LEAVE SOUND
@@ -31,8 +32,8 @@ class MessageHandler:
                 # LIGHT OFF ACTIVITY LEDS
                 activity_type = json_message["activity_type"]
                 rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
-                self.good_led_activities.off_name(str(rfid_id))
-                self.error_led_activities.off_name(str(rfid_id))
+                self.good_led_activities.off_name(rfid_id)
+                self.error_led_activities.off_name(rfid_id)
                 pass
             elif json_message["type"] == "found":
                 # PLAY PRINTING SOUND
@@ -40,7 +41,9 @@ class MessageHandler:
                 # LIGHT ON GOOD ACTIVITY LED
                 activity_type = json_message["activity_type"]
                 rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
-                self.good_led_activities.on_name(str(rfid_id))
+                time_light_on_seconds = 5
+                self.good_led_activities.on_name(rfid_id)
+                Timer().start(time_light_on_seconds, self.good_led_activities.off_name, rfid_id)
                 #TODO: GENERATE IMAGE
                 #TODO: PRINT IMAGE
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
@@ -49,7 +52,7 @@ class MessageHandler:
                 # BLINKING ERROR ACTIVITY LED
                 activity_type = json_message["activity_type"]
                 rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
-                self.error_led_activities.blink_name(str(rfid_id), blinking_repeat=10)
+                self.error_led_activities.blink_name(rfid_id, blinking_repeat=10)
                 pass
             else:
                 PlaySound.error()
