@@ -1,56 +1,64 @@
 from GlobalVariables import *
+from tools.Timer import Timer
 from tools.Sound import PlaySound
+from rfid.RfidController import RfidController
 
 class MessageHandler:
     def __init__(self) -> None:
 
         #* Led controller
         from led.LedController import LEDController
-        self.led_matchmaking = LEDController(pin_numbers=LedPins.instance().matchmaking_number)
-        self.led_activities = LEDController(pin_by_name=LedPins.instance().activities_led_number)
+        self.led_trafic = LEDController(pin_numbers=LedPins.instance().trafic_number)
+        self.good_led_activities = LEDController(pin_by_name=LedPins.instance().good_rfid_led_number)
+        self.error_led_activities = LEDController(pin_by_name=LedPins.instance().error_rfid_led_number)
 
     def process_message(self, json_message):
         if "type" in json_message:
-            if json_message["type"] == "activity_created":
+            if json_message["type"] == "new_request":
+                # BLINK TRAFIC LEDS
+                self.led_trafic.all_blinking(blinking_repeat=1)
+                pass
+            elif json_message["type"] == "join":
+                # PLAY JOIN SOUND
+                PlaySound.join()
+                # LIGHT ON ACTIVITY LEDS
                 activity_type = json_message["activity_type"]
-                self.led_activities.on_name(activity_type)
-            elif json_message["type"] == "new_participant":
-                last_number_participant = self.led_matchmaking.counter
-                actual_number_participant = json_message["count"]
-                loop_number = abs(actual_number_participant - last_number_participant)
-                if actual_number_participant > last_number_participant:
-                    PlaySound.join()
-                    for i in range(0, loop_number):
-                        self.led_matchmaking.on_next()
-                else:
-                    DLog.LogWarning("There is not new participant")
-            elif json_message["type"] == "drop_participant":
-                last_number_participant = self.led_matchmaking.counter
-                actual_number_participant = json_message["count"]
-                loop_number = abs(actual_number_participant - last_number_participant)
-                if actual_number_participant < last_number_participant:
-                    PlaySound.leave()
-                    for i in range(0, loop_number):
-                        self.led_matchmaking.off_previous()
-                else:
-                    DLog.LogWarning("There is not drop participant")
-            elif json_message["type"] == "activity_leave":
+                rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
+                self.good_led_activities.on_name(rfid_id)
+                pass
+            elif json_message["type"] == "leave":
+                # PLAY LEAVE SOUND
                 PlaySound.leave()
-                self.led_matchmaking.all_off()
-            elif json_message["type"] == "activity_full":
+                # LIGHT OFF ACTIVITY LEDS
                 activity_type = json_message["activity_type"]
-                DLog.LogSuccess(f"Printing of {activity_type} result...")
+                rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
+                self.good_led_activities.off_name(rfid_id)
+                self.error_led_activities.off_name(rfid_id)
+                pass
+            elif json_message["type"] == "found":
+                # PLAY PRINTING SOUND
                 PlaySound.print()
-                self.led_matchmaking.blinking()
-            elif json_message["type"] == "activity_empty":
-                PlaySound.leave()
+                # LIGHT ON GOOD ACTIVITY LED
                 activity_type = json_message["activity_type"]
-                self.led_activities.off_name(activity_type)
+                rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
+                time_light_on_seconds = 5
+                self.good_led_activities.on_name(rfid_id)
+                Timer().start(time_light_on_seconds, self.good_led_activities.off_name, rfid_id)
+                #TODO: GENERATE IMAGE
+                #TODO: PRINT IMAGE
+                DLog.LogSuccess(f"Printing of {activity_type} result...")
+            elif json_message["type"] == "not_found":
+                #TODO: PLAY NOT_FOUND SOUND
+                # BLINKING ERROR ACTIVITY LED
+                activity_type = json_message["activity_type"]
+                rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
+                self.error_led_activities.blink_name(rfid_id, blinking_repeat=10)
+                pass
             else:
                 PlaySound.error()
                 DLog.LogError("Unknown type")
         elif "uid" in json_message:
-            DLog.LogWarning("Nothing to do with uid")
+            pass
         else:
             DLog.LogError("Can't treat this message")
 

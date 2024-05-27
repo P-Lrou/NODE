@@ -4,18 +4,23 @@ class LedPins:
     _instance = None
 
     def __init__(self):
-        self.matchmaking_number = [6, 13, 19, 26]
-        self.activities_number = [17, 27, 22, 23, 5, 0]
-        self.activities_led_number = {}
-        activities = Activities.instance().activities
-        if len(self.activities_number) == len(activities):
-            for i in range(0, len(activities)):
-                self.activities_led_number[activities[i]] = self.activities_number[i]
+        self.trafic_number: list[int] = [14]
+        self.good_rfid_number: list[int] = [20, 1, 23]
+        self.error_rfid_number: list[int] = [21, 7, 24]
+        
+        rfid_ids = RfidPins.instance().rfid_number
+        if len(self.good_rfid_number) == len(rfid_ids):
+            self.good_rfid_led_number: dict[str, int] = {str(id): self.good_rfid_number[key] for key, id in enumerate(rfid_ids)}
         else:
-            DLog.LogError("No matching length between activities_number and activities")
+            DLog.LogError("No length matching between good_rfid_number and rfid_ids")
+
+        if len(self.error_rfid_number) == len(rfid_ids):
+            self.error_rfid_led_number: dict[str, int] = {str(id): self.error_rfid_number[key] for key, id in enumerate(rfid_ids)}
+        else:
+            DLog.LogError("No length matching between error_rfid_number and rfid_ids")
 
     @classmethod
-    def instance(cls):
+    def instance(cls) -> "LedPins":
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
@@ -38,16 +43,16 @@ class Activities:
 
     def __init__(self):
         self.activities = [
-            "belotte",
-            "echecs",
+            "belote",
+            "triomino",
             "scrabble",
-            "tarot",
-            "bridge",
-            "balade"
+            "gouter",
+            "petanque",
+            "promenade"
         ]
 
     @classmethod
-    def instance(cls):
+    def instance(cls) -> "Activities":
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance

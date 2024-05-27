@@ -1,69 +1,87 @@
-from Rfid import Rfid
-from RfidDelegate import RfidDelegate
 import RPi.GPIO as GPIO
+from mfrc522 import SimpleMFRC522
+import spidev
 
-class MyDelegate(RfidDelegate):
-    def __init__(self) -> None:
-        super().__init__()
-        self.rfid = None
-        self.activities = [
-            "belotte",
-            "echecs",
-            "scrabble",
-            "tarot"
-        ]
-        self.actual_activities = 0
-        self.writing = False
-        self.block = False
+class NFC():
+    def __init__(self, bus=0, device=0, spd=1000000):
+        self.reader = SimpleMFRC522()
+        self.close()
+        self.boards = {}
+        
+        self.bus = bus
+        self.device = device
+        self.spd = spd
+        self.text = ""
 
-    def set_rfid(self, rfid):
-        self.rfid = rfid
+    def reinit(self):
+        self.reader.READER.spi = spidev.SpiDev()
+        self.reader.READER.spi.open(self.bus, self.device)
+        self.reader.READER.spi.max_speed_hz = self.spd
+        self.reader.READER.MFRC522_Init()
 
-    def rfid_placed(self, rfid_data):
-        super().rfid_placed(rfid_data)
-        print(f"Data: {rfid_data}")
+    def close(self):
+        self.reader.READER.spi.close()
 
-    def rfid_detected(self, rfid_data):
-        super().rfid_detected(rfid_data)
-        if self.rfid:
-            if len(self.activities) > self.actual_activities:
-                if not self.block:
-                    self.writing = True
-                    self.rfid.write_no_block(self.activities[self.actual_activities])
-                else:
-                    print("Please remove the card")
-            else:
-                if self.writing:
-                    self.writing = False
-                    print("Finished Writing")
-        else:
-            print("No rfid object")
+    def addBoard(self, rid, pin):
+        GPIO.setup(pin, GPIO.OUT)
+        self.boards[rid] = pin
 
-    def rfid_not_written(self):
-        super().rfid_not_written()
-        print("Attempting to write...")
+    def selectBoard(self, rid):
+        if not rid in self.boards:
+            print("readerid " + rid + " not found")
+            return False
 
-    def rfid_has_written(self, text):
-        super().rfid_has_written(text)
-        self.block = True
-        print(f"Written '{text}' with success!")
-        self.actual_activities += 1
+        for loop_id in self.boards:
+            gpio_state = GPIO.HIGH if loop_id == rid else GPIO.LOW
+            GPIO.output(self.boards[loop_id], gpio_state)
+        return True
 
-    def rfid_removed(self):
-        super().rfid_removed()
-        self.block = False
-        if self.writing:
-            self.writing = False
-            print("Fail to write")
+    def read(self, rid):
+        if not self.selectBoard(rid):
+            return None
+
+        self.reinit()
+        cid, val = self.reader.read_no_block()
+        self.text = val if val is not None else ""
+        # print(f"{rid}: {cid}")
+        self.close()
+
+        return val
+
+    def write(self, rid, value):
+        if not self.selectBoard(rid):
+            return False
+
+        self.reinit()
+        self.reader.write_no_block(value)
+        self.close()
+        return True
 
 
+if __name__ == "__main__":
+    activities = [
+        "belote",
+        "triomino",
+        "scrabble",
+        "gouter",
+        "petanque",
+        "promenade"
+    ]
+    GPIO.setmode(GPIO.BCM)
+    nfc = NFC()
+    try:
+        nfc.addBoard("reader1",2)
+        nfc.addBoard("reader2",3)
+        nfc.addBoard("reader3",4)
+        for key, activity in enumerate(activities):
+            print(f"Activity: {activity}")
+            while nfc.read("reader3") is not None:
+                pass
+            while not nfc.text.startswith(activity):
+                nfc.write("reader3", activity)
+                nfc.read("reader3")
+        print("Writing completed")
+    except KeyboardInterrupt:
+        pass
 
-my_delegate = MyDelegate()
-rfid = Rfid(my_delegate)
-my_delegate.set_rfid(rfid)
-
-try:
-    while True:
-        rfid.process()
-except KeyboardInterrupt:
     GPIO.cleanup()

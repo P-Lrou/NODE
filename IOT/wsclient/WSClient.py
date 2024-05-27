@@ -1,6 +1,6 @@
 import websocket
 from threading import Thread
-import json
+from tools.JSONTools import *
 
 class WSClient(Thread):
     def __init__(self, uri, delegate=None):
@@ -24,7 +24,9 @@ class WSClient(Thread):
             "text": text
         }
         print(f"Sending message: {message}")
-        self.ws.send(json.dumps(message))
+        message_to_send = json_encode(message)
+        if message_to_send:
+            self.ws.send(message_to_send)
 
     def on_open(self, ws):
         self.connected = True
@@ -32,11 +34,12 @@ class WSClient(Thread):
             self.delegate.on_open()
 
     def on_message(self, ws, message):
-        json_message = json.loads(message)
-        if "uid" in json_message:
-            self.uid = json_message["uid"]
-        if self.delegate:
-            self.delegate.on_message(json_message)
+        json_message = json_decode(message)
+        if json_message:
+            if "uid" in json_message:
+                self.uid = json_message["uid"]
+            if self.delegate:
+                self.delegate.on_message(json_message)
 
     def on_error(self, ws, error):
         if self.delegate:

@@ -23,7 +23,7 @@ class IOTManager:
         #* Rfid reader
         from rfid.RfidController import RfidController
         rfid_callback = RfidCallback(self.ws_client)
-        self.rfid_controller = RfidController(rfid_callback)
+        self.rfid_controller = RfidController.instance(rfid_callback)
 
         from button.MyButton import MyButton
         button_callback = ButtonCallback(self.ws_client)
@@ -53,7 +53,7 @@ class IOTManager:
     def start(self):
         try:
             self.ws_client.start()
-            self.run_checks()
+            # self.run_checks()
             while True:
                 if self.ws_client.connected:
                     self.rfid_controller.process()

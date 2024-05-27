@@ -21,9 +21,12 @@ class MyDelegate(WSDelegate):
         super().on_message(message)
         if not self.has_sending:
             self.has_sending = True
-            for data in data_to_send:
-                self.ws_client.send_message(data)
-                time.sleep(self.sending_delta)
+            while self.data_to_send:
+                data = self.data_to_send.pop(0)
+                if self.data_to_send == []:
+                    data["is_last"] = True
+                self.ws_client.send_message(json.dumps(data))
+                time.sleep(self.sending_delta) #! TIMING
 
     def on_close(self):
         super().on_close()
@@ -31,8 +34,9 @@ class MyDelegate(WSDelegate):
     def on_error(self, error):
         super().on_error(error)
 
+#! ATTENTION SI PLUSIEURS DATA TO SEND => UN TIME.SLEEP EST EFFECTUE
 data_to_send = [
-    ActivitySimulation.add_belote()
+    ActivitySimulation.add_scrabble()
 ]
 my_delegate = MyDelegate(data_to_send)
 # client = WSClient.connectToLocalhost(my_delegate)
