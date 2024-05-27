@@ -1,4 +1,5 @@
 import subprocess
+from tools.DLog import DLog
 
 class PlaySound:
     join_file = 'import/sound/discord_join.wav'
@@ -14,6 +15,7 @@ class PlaySound:
 
     @staticmethod
     def play_sound(file, volume=100):
+        DLog.LogSuccess("PLAY SOUND")
         PlaySound.set_volume(volume)
         subprocess.run(['aplay', file])
 
