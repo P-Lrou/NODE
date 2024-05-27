@@ -13,13 +13,13 @@ class ActivityBuilder:
     @staticmethod
     def add_state():
         return {
-            "state": "joined"
+            "state": "request"
         }
     
     @staticmethod
     def remove_state():
         return {
-            "state": "retired"
+            "state": "retire"
         }
     
     @staticmethod
@@ -46,7 +46,7 @@ class ActivitySimulation:
             ActivityBuilder.add_state(),
             ActivityBuilder.set_activity("belote")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def remove_belote():
@@ -55,7 +55,7 @@ class ActivitySimulation:
             ActivityBuilder.remove_state(),
             ActivityBuilder.set_activity("belote")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def add_scrabble():
@@ -64,7 +64,7 @@ class ActivitySimulation:
             ActivityBuilder.add_state(),
             ActivityBuilder.set_activity("scrabble")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def remove_scrabble():
@@ -73,7 +73,7 @@ class ActivitySimulation:
             ActivityBuilder.remove_state(),
             ActivityBuilder.set_activity("scrabble")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def add_gouter():
@@ -82,7 +82,7 @@ class ActivitySimulation:
             ActivityBuilder.add_state(),
             ActivityBuilder.set_activity("gouter")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def remove_gouter():
@@ -91,7 +91,7 @@ class ActivitySimulation:
             ActivityBuilder.remove_state(),
             ActivityBuilder.set_activity("gouter")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def add_promenade():
@@ -100,7 +100,7 @@ class ActivitySimulation:
             ActivityBuilder.add_state(),
             ActivityBuilder.set_activity("promenade")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def remove_promenade():
@@ -109,7 +109,7 @@ class ActivitySimulation:
             ActivityBuilder.remove_state(),
             ActivityBuilder.set_activity("promenade")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def add_petanque():
@@ -118,7 +118,7 @@ class ActivitySimulation:
             ActivityBuilder.add_state(),
             ActivityBuilder.set_activity("petanque")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def remove_petanque():
@@ -127,7 +127,7 @@ class ActivitySimulation:
             ActivityBuilder.remove_state(),
             ActivityBuilder.set_activity("petanque")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def add_triomino():
@@ -136,7 +136,7 @@ class ActivitySimulation:
             ActivityBuilder.add_state(),
             ActivityBuilder.set_activity("triomino")
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
     def remove_triomino():
@@ -145,4 +145,4 @@ class ActivitySimulation:
             ActivityBuilder.remove_state(),
             ActivityBuilder.set_activity("triomino")
         )
-        return json.dumps(data)
+        return data
