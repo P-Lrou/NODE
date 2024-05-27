@@ -1,9 +1,10 @@
 from tools.DLog import DLog
+from tools.Timer import Timer
 from Activities.ActivitiesManager import ActivitiesManager
 
 class ClientHandler:
     def __init__(self) -> None:
-        pass
+        self.timeout_request_seconds = 3
 
     def process_message(self, data: dict):
         if "client_id" in data:
@@ -13,10 +14,10 @@ class ClientHandler:
                     if "state" in data:
                         state = data["state"]
                         match state:
-                            case "joined":
-                                return ActivitiesManager.new_participant(data)
-                            case "retired":
-                                return ActivitiesManager.drop_participant_by_activity(data)
+                            case "request":
+                                return ActivitiesManager.new_request(data)
+                            case "cancel":
+                                return ActivitiesManager.cancel(data)
                             case _:
                                 message_error = f"Unknown state: {state}"
                     else:
@@ -38,7 +39,7 @@ class ClientHandler:
             
             
 
-    def process_disconnection(self, client) -> list[dict]:
-        return ActivitiesManager.drop_participant_by_client(client)
+    def process_disconnection(self, client) -> None:
+        ActivitiesManager.cancel_by_disconnection(client)
 
 

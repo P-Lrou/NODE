@@ -27,7 +27,7 @@ class BaseModel(Model):
 
     @classmethod
     def get_all(cls):
-        return cls.select()
+        return list(cls.select())
 
     @classmethod
     def test_connection(cls):

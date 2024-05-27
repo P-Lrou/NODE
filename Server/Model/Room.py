@@ -1,44 +1,40 @@
 from tools.DLog import DLog
 from Model.BaseModel import *
+from typing import List, Optional, TYPE_CHECKING
 import datetime
+
+if TYPE_CHECKING:
+    from Model.Activity import Activity
+    from Model.Participant import Participant
 
 class Room(BaseModel):
     from Model.Activity import Activity
+    backref = "rooms"
     id = IntegerField(primary_key=True)
-    activity:Activity = ForeignKeyField(Activity, backref='rooms')
-    opened = IntegerField()
+    activity: Activity = ForeignKeyField(Activity, backref=backref)
     created_at = DateTimeField()
+
+    DELTA_MINUTES = 30
+    DIFF_TIMEZONE = 2
 
     class Meta:
         table_name = 'rooms'
 
     @classmethod
-    def insert_room(cls, activity):
-        return cls.create(activity=activity, opened=1, created_at=datetime.datetime.now())
-
-    @classmethod
-    def get_rooms_by_activity(cls, activity) -> list:
-        return cls.select().where(cls.activity == activity)
+    def insert(cls, activity: "Activity", **insert) -> "Room":
+        data = {
+            "activity": activity,
+            "created_at": datetime.datetime.now() + datetime.timedelta(hours=cls.DIFF_TIMEZONE)
+        }
+        query: ModelInsert = super(Room, cls).insert(data, **insert)
+        room_id = query.execute()
+        room = cls.get_by_id(room_id)
+        return room
     
-    @classmethod
-    def get_opened_rooms(cls) -> list:
-        return cls.select().where(cls.opened == 1)
+    def get_participants(self) -> List["Participant"]:
+        return list(self.participants)
     
-    def get_participants(self) -> list:
-        from Model.Participant import Participant
-        return (Participant
-                .select()
-                .where(Participant.room == self))
-    
-    def is_opened(self) -> bool:
-        return self.opened == 1
-    
-    def is_finished_to_wait(self) -> bool:
-        actual_datetime = datetime.datetime.now()
-        duration = self.created_at - actual_datetime
-        return duration.total_seconds() >= self.activity.max_seconds_waiting_time
-    
-    def close(self) -> None:
-        self.opened = 0
-        self.save()
+    def get_rdv_time(self):
+        rdv_time: datetime.datetime = self.created_at + datetime.timedelta(minutes=self.DELTA_MINUTES)
+        return rdv_time.strftime("%H:%M")
         

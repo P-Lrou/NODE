@@ -4,6 +4,8 @@ from tools.JSONTools import *
 # MODEL
 from Model.BaseModel import BaseModel
 from Model.Activity import Activity
+from Model.Member import Member
+from Model.Request import Request
 from Model.Room import Room
 from Model.Participant import Participant
 
@@ -11,10 +13,13 @@ class ActivitiesManager:
     def __init__(self):
         self.tables: list[BaseModel] = [
             Activity,
+            Member,
+            Request,
             Room,
             Participant
         ]
         self.tables_to_reset: list[BaseModel] = [
+            Request,
             Room,
             Participant
         ]
@@ -24,55 +29,73 @@ class ActivitiesManager:
             table.truncate_table()
 
     @staticmethod
-    def new_participant(data: dict) -> list[dict]:
+    def create_groupe(activity: Activity) -> tuple[bool, dict]:
+        room: Room = Room.insert(activity)
+        if room:
+            attempting_members = activity.get_attempting_members()
+            for attempting_member in attempting_members:
+                request = attempting_member.get_attempting_request_by_activity(activity)
+                if request:
+                    request.update_state(Request.ACCEPTED)
+                    participant: Participant = Participant.insert(attempting_member, room)
+                    if participant:
+                        targets = [attempting_member.uid for attempting_member in attempting_members]
+                        new_groupe = json_encode({"type": "found", "activity_type": activity.name, "rdv_at": str(room.get_rdv_time())})
+                    else:
+                        DLog.LogError(f"Error to insert a participant. Member id: {attempting_member}, Room id: {room}")
+                        return False, {}
+                else:
+                    DLog.LogError(f"Request of activity member not found. Member id: {attempting_member}, Activity: {activity.name}")
+                    return False, {}
+                
+            DLog.LogWhisper(f"New groupe: {activity.name}")
+            return True, {
+                "targets": targets,
+                "message": new_groupe
+            }
+        else:
+            DLog.LogError(f"Error to insert a room. Activity: {activity.name}")
+        return False, {}
+
+    @classmethod
+    def looking_for_groupe(cls, member: Member) -> tuple[bool, dict]:
+        requests = member.get_requests()
+        number_by_activity: dict[Activity, int] = {request.activity: len(request.activity.get_requests()) for request in requests}
+        sorted_number_by_activity = dict(sorted(number_by_activity.items(), key=lambda item: item[1], reverse=True))
+        for activity in sorted_number_by_activity.keys():
+            if activity.has_max_participants():
+                return cls.create_groupe(activity)
+            return False, {}
+        DLog.LogError(f"No activity found")
+        return False, {}
+
+    @classmethod
+    def new_request(cls, data: dict) -> list[dict]:
         data_to_send: list[dict] = []
         if "activity_type" in data: 
             activity_type = data["activity_type"]
             if "client_uid" in data: 
                 activity: Activity = Activity.get_activity_by_name(activity_type)
                 if activity:
-                    room: Room = activity.get_first_opened_room()
-                    if not room:
-                        # Create room
-                        room: Room = Room.insert_room(activity)
-                        creation_message = json_encode({"type": "activity_created", "activity_type": activity_type})
-                        data_to_send.append({
-                            "targets": "all",
-                            "message": creation_message
-                        })
-                        DLog.LogWhisper(f"New activity: {activity_type} => sending: {creation_message}")
-                    
-                    if room:
-                        # Create participant
-                        new_participant: Participant = Participant.insert_participant(data["client_id"], data["client_uid"], room)
-                        if new_participant:
-
-                            # Send data for number of participant
-                            participants: list[Participant] = room.get_participants()
-                            participants_count: int = len(participants)
-                            new_participant_message: str = json_encode({"type": "new_participant", "activity_type": activity_type, "count": participants_count})
-                            targets: list = [participant.ws_client_id for participant in participants]
+                    member: Member = Member.get_first_member_by_uid(data["client_uid"])
+                    if member:
+                        request = Request.insert("", activity, member)
+                        if request:
+                            request_message = json_encode({"type": "new_request", "activity_type": activity_type})
                             data_to_send.append({
-                                "targets": targets,
-                                "message": new_participant_message
+                                "targets": "all",
+                                "message": request_message
                             })
-                            DLog.LogWhisper(f"New participant to {activity_type} => sending: {new_participant_message}")
-
-                            # If the activity is full
-                            if participants_count >= room.activity.max_participants:
-                                room.close()
-                                complete_message = json_encode({"type": "activity_full", "activity_type": activity_type})
-                                data_to_send.append({
-                                    "target": targets,
-                                    "message": complete_message
-                                })
-                                DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
-
+                            DLog.LogWhisper(f"New request: {activity_type}")
+                            if "is_last" in data and data["is_last"] is True:
+                                has_groupe, new_data = cls.looking_for_groupe(member)
+                                if has_groupe:
+                                    data_to_send.append(new_data)
                             return data_to_send
                         else:
-                            message_error = "Can't add participant to the activity"
+                            message_error = "Error to insert a request"
                     else:
-                        message_error = "Error to find a valid room"
+                        message_error = f"No member found with uid: {data['client_uid']}"
                 else:
                     message_error = f"No {data['activity_type']} activity found"
             else:
@@ -90,52 +113,29 @@ class ActivitiesManager:
         return data_to_send
 
     @staticmethod
-    def drop_participant_by_activity(data: dict) -> list[dict]:
+    def cancel(data: dict) -> list[dict]:
         data_to_send: list[dict] = []
         if "activity_type" in data:
             activity_type = data["activity_type"]
             if "client_uid" in data:
                 activity: Activity = Activity.get_activity_by_name(activity_type)
                 if activity:
-                    room: Room = activity.get_first_opened_room()
-                    if room:
-                        # Delete participant with good uid
-                        participants_to_drop: list[Participant] = Participant.get_participants_by_room_and_uid(room, data["client_uid"])
-                        if len(participants_to_drop) > 0:
-                            participant_to_drop = participants_to_drop[0]
-                            Participant.delete_by_id(participant_to_drop)
-                            leave_message = json_encode({"type": "activity_leave", "activity_type": activity_type})
+                    member: Member = Member.get_first_member_by_uid(data["client_uid"])
+                    if member:
+                        request = member.get_attempting_request_by_activity(activity)
+                        if request:
+                            request.update_state(Request.REFUSED)
+                            leave_message = json_encode({"type": "leave", "activity_type": activity_type})
                             data_to_send.append({
-                                "targets": [data["client_id"]],
+                                "targets": [data["client_uid"]],
                                 "message": leave_message
                             })
-                            DLog.LogWhisper(f"A participant leave the activity {activity_type} => sending: {leave_message}")
-
-                            # Send data for number of participant
-                            participants: list[Participant] = room.get_participants()
-                            participants_count = len(participants)
-                            # If room is empty
-                            if participants_count <= 0:
-                                empty_message = json_encode({"type": "activity_empty", "activity_type": activity_type})
-                                data_to_send.append({
-                                    "targets": "all",
-                                    "message": empty_message
-                                })
-                                DLog.LogWhisper(f"Activity {activity_type} is empty => sending: {empty_message}")
-                                Room.delete_by_id(room)
-                            else:
-                                drop_participant_message = json_encode({"type": "drop_participant", "activity_type": activity_type, "count": participants_count})
-                                targets :list = [participant.ws_client_id for participant in participants]
-                                data_to_send.append({
-                                    "targets": targets,
-                                    "message": drop_participant_message
-                                })
-                                DLog.LogWhisper(f"Drop participant to {activity_type} => sending: {drop_participant_message}")
+                            DLog.LogWhisper(f"Cancel request: {activity_type}")
                             return data_to_send
                         else:
-                            message_error = f"Participant not found in the opnened room of {activity_type} activity. uid: {data['uid']}"
+                            message_error = f"Request of activity member not found. Member id: {member}, Activity: {activity.name}"
                     else:
-                        message_error = "Error to find a valid room"
+                        message_error = f"No member found. Member id: {member}"
                 else:
                     message_error = f"No {data['activity_type']} activity found"
             else:
@@ -153,62 +153,36 @@ class ActivitiesManager:
         return data_to_send
 
     @staticmethod
-    def drop_participant_by_client(client) -> list[dict]:
-        data_to_send: list[dict] = []
-        participants_to_drop: list[Participant] = Participant.get_participants_by_uid(client["uid"])
-        for participant in participants_to_drop:
-            room: Room = participant.room
-            activity_type = room.activity.name
-            if not room.is_opened():
-                continue
-            Participant.delete_by_id(participant)
-            participants: list[Participant] = room.get_participants()
-            participants_count = len(participants)
-            # If room is empty
-            if participants_count <= 0:
-                empty_message = json_encode({"type": "activity_empty", "activity_type": activity_type})
-                data_to_send.append({
-                    "targets": "all",
-                    "message": empty_message
-                })
-                DLog.LogWhisper(f"Activity {activity_type} is empty => sending: {empty_message}")
-                Room.delete_by_id(room)
-            else:
-                drop_participant_message = json_encode({"type": "drop_participant", "activity_type": activity_type, "count": participants_count})
-                targets: list = [participant.ws_client_id for participant in participants]
-                data_to_send.append({
-                    "targets": targets,
-                    "message": drop_participant_message
-                })
-                DLog.LogWhisper(f"Drop participant to {activity_type} => sending: {drop_participant_message}")
-        if len(data_to_send) > 0:
-            return data_to_send
-        
-        message_error = "No participant to drop found"
-        data_to_send.append({
-            "targets": [client["id"]],
-            "message": message_error
-        })
-        DLog.LogError(message_error)
-        return data_to_send
+    def cancel_by_disconnection(client):
+        member: Member = Member.get_first_member_by_uid(client["uid"])
+        if member:
+            requests = member.get_attempting_requests()
+            for request in requests:
+                request.update_state(Request.REFUSED)
+            DLog.LogWhisper("Disconnection of a member, REFUSED all of his requests")
+        else:
+            DLog.LogError(f"No member found. uid: {client['uid']}")
 
-    def check_room_waiting_time(self, callback):
+    def check_requests_waiting_time(self, callback):
         data_to_send: list[dict] = []
-        rooms: list[Room] = Room.get_opened_rooms()
-        for room in rooms:
-            if room.is_finished_to_wait():
-                activity_type = room.activity.name
-                participants: list[Participant] = room.get_participants()
-                room.close()
-                complete_message = json_encode({"type": "activity_full", "activity_type": activity_type})
-                data_to_send.append({
-                    "target": [participant.ws_client_id for participant in participants],
-                    "message": complete_message
-                })
-                DLog.LogWhisper(f"Activity {activity_type} is full => sending: {complete_message}")
+        requests: list[Request] = Request.get_attempting_requests()
+        for request in requests:
+            if request.has_exceeded_the_time_limit():
+                activity = request.activity
+                if activity.has_min_participants():
+                    has_groupe, new_data = self.create_groupe(activity)
+                    if has_groupe:
+                        data_to_send.append(new_data)
+                else:
+                    request.update_state(Request.REFUSED)
+                    targets = [request.member.uid]
+                    not_found_message = json_encode({"type": "not_found", "activity_type": activity.name})
+                    data_to_send.append({
+                        "targets": targets,
+                        "message": not_found_message
+                    })
         if len(data_to_send) > 0:
             callback(data_to_send)
-
 
     def test(self) -> bool:
         for table in self.tables:

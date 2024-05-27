@@ -1,58 +1,46 @@
 from tools.DLog import DLog
 from Model.BaseModel import *
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from Model.Request import Request
+    from Model.Member import Member
+    from Model.Room import Room
 
 class Activity(BaseModel):
     id = IntegerField(primary_key=True)
     name = CharField()
     min_participants = IntegerField(default=2)
     max_participants = IntegerField(default=6)
-    max_seconds_waiting_time = IntegerField(default=900)
+    max_duration = IntegerField(default=900)
 
     class Meta:
         table_name = 'activities'
 
     @classmethod
-    def get_activity_by_name(cls, name):
+    def get_activity_by_name(cls, name: str) -> Optional["Activity"]:
         if name:
             return cls.get_or_none(cls.name == name)
         else:
             DLog.LogError("Name is required")
             return None
-        
-    def get_rooms(self) ->list:
-        from Model.Room import Room
-        return (Room
-                .select()
-                .where(Room.activity == self))
     
-    def get_participants(self) -> list:
-        from Model.Room import Room
-        from Model.Participant import Participant
-        return (Participant
-                .select()
-                .join(Room)
-                .where(
-                    (Room.activity == self) &
-                    (Participant.room == Room.id)
-                ))
-
-    def get_opened_rooms(self) -> list:
-        from Model.Room import Room
-        from Model.Participant import Participant
-        rooms = (Room
-                 .select()
-                 .where(
-                     (Room.activity_id == self) &
-                     (Room.opened == 1)
-                ))
-        return rooms
+    def get_requests(self) -> List["Request"]:
+        return list(self.requests)
     
-    def get_first_opened_room(self):
-        rooms = self.get_opened_rooms()
-        if len(rooms) > 0:
-            return rooms[0]
-        else:
-            return None
+    def get_attempting_requests(self) -> List["Request"]:
+        from Model.Request import Request
+        return [request for request in self.requests if request.state == Request.ATTEMPTING]
+    
+    def get_attempting_members(self) -> List["Member"]:
+        attempting_requests = self.get_attempting_requests()
+        return [request.member for request in attempting_requests]
     
     def has_min_participants(self) -> bool:
-        return len(self.get_participants()) >= self.min_participants
+        return len(self.get_attempting_members()) >= self.min_participants
+    
+    def has_max_participants(self) -> bool:
+        return len(self.get_attempting_members()) == self.max_participants
+    
+    def get_rooms(self) -> List["Room"]:
+        return list(self.rooms)

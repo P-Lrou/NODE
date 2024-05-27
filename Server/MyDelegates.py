@@ -4,11 +4,24 @@ from tools.JSONTools import *
 # WEBSOCKET SERVER
 from WSServer.WSServerDelegate import WSServerDelegate
 from WSServer.ClientHandler import ClientHandler
+# MEMBER MODEL
+from Model.Member import Member
 
 class WSServerCallback(WSServerDelegate):
     def __init__(self) -> None:
         super().__init__()
         self.client_handler = ClientHandler()
+
+    def new_connection(self, client, server) -> None:
+        super().new_connection(client, server)
+        name = client["uid"]
+        if "name" in client:
+            name = client["name"]
+        member = Member.insert(name, client["uid"])
+        if member:
+            DLog.LogSuccess("Insert member")
+        else:
+            DLog.LogError(f"Fail to insert member with uid: {client['uid']}")
 
     def received_message(self, client, server, message: str) -> None:
         super().received_message(client, server, message)
@@ -37,22 +50,31 @@ class WSServerCallback(WSServerDelegate):
 
     def lose_connection(self, client, server) -> None:
         super().lose_connection(client, server)
-        messages = self.client_handler.process_disconnection(client)
-        self.send_messages(messages)
+        self.client_handler.process_disconnection(client)
+
+    def send_data(self, server, data):
+        if "targets" in data:
+            if "message" in data:
+                if data["targets"] == "all":
+                    DLog.LogWhisper(f"sending => {data['message']}")
+                    for client in server.clients:
+                        server.send_message(client, data["message"])
+                else:
+                    for uid in data["targets"]:
+                        DLog.LogWhisper(f"sending => {data['message']}")
+                        for client in server.clients:
+                            if client["uid"] == uid:
+                                server.send_message(client, data["message"])
+            else:
+                DLog.LogError("No 'message' key in data")
+        else:
+            DLog.LogError("No 'targets' key in data")
 
     def send_messages(self, server, data_to_send: list[dict]) -> None:
-        for data in data_to_send:
-            if "tagrets" in  data:
-                if "message" in data:
-                    if data["targets"] == "all":
-                        for client in server.clients:
-                            server.send_message(client, data["message"])
-                    else:
-                        for id in data["targets"]:
-                            for client in server.clients:
-                                if client["id"] == id:
-                                    server.send_message(client, data["message"])
-                else:
-                    DLog.LogError("No 'message' key in data")
+        for non_typed_data in data_to_send:
+            if isinstance(non_typed_data, list):
+                for data in non_typed_data:
+                    self.send_data(server, data)
             else:
-                DLog.LogError("No 'targets' key in data")
+                self.send_data(server, non_typed_data)
+                
