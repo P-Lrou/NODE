@@ -3,6 +3,7 @@ from Model.BaseModel import *
 from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from Model.Activity import Activity
     from Model.Request import Request
 
 class Member(BaseModel):
@@ -20,14 +21,13 @@ class Member(BaseModel):
             'uid': uid
         }
         query: ModelInsert = super(Member, cls).insert(data, **insert)
-        member = query.execute()
+        member_id = query.execute()
+        member = cls.get_by_id(member_id)
         return member
     
     @classmethod
-    def get_members_by_name(cls, name: str) -> Optional["Member"]:
-        query = cls.select().where(cls.name == name)
-        members = cls.query_to_list(query)
-        return members
+    def get_members_by_name(cls, name: str) -> List["Member"]:
+        return list(cls.select().where(cls.name == name))
     
     @classmethod
     def get_first_member_by_name(cls, name: str) -> Optional["Member"]:
@@ -39,9 +39,26 @@ class Member(BaseModel):
         members = cls.get_members_by_name(name)
         return members[-1] if members else None
     
+    @classmethod
+    def get_members_by_uid(cls, uid: str) -> List["Member"]:
+        return list(cls.select().where(cls.uid == uid))
+
+    @classmethod
+    def get_first_member_by_uid(cls, uid: str) -> Optional["Member"]:
+        members = cls.get_members_by_uid(uid)
+        return members[0] if members else None
+    
     def get_requests(self) -> List["Request"]:
         return [request for request in self.requests]
     
     def get_attempting_requests(self) -> List["Request"]:
         from Model.Request import Request
         return [request for request in self.requests if request.state == Request.ATTEMPTING]
+    
+    def get_attempting_request_by_activity(self, activity: "Activity") -> Optional["Request"]:
+        from Model.Request import Request
+        requests = [request for request in self.requests if request.state == Request.ATTEMPTING and request.activity == activity]
+        if requests:
+            return requests[0]
+        else:
+            return None

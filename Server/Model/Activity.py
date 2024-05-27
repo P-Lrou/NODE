@@ -39,5 +39,8 @@ class Activity(BaseModel):
     def has_min_participants(self) -> bool:
         return len(self.get_attempting_members()) >= self.min_participants
     
+    def has_max_participants(self) -> bool:
+        return len(self.get_attempting_members()) == self.max_participants
+    
     def get_rooms(self) -> List["Room"]:
         return list(self.rooms)

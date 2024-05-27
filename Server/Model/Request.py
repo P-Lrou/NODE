@@ -32,15 +32,16 @@ class Request(BaseModel):
 
     @classmethod
     def __check_state_value(cls, state):
+        if state == "":
+            state = cls.ATTEMPTING
         if state not in cls.state_possibilities:
             DLog.LogError(f"'state' does not contain a valid value")
-            return False
-        return True
+            return cls.ATTEMPTING
+        return state
 
     @classmethod
     def insert(cls, state: str, activity: "Activity", member: "Member", **insert) -> "Request":
-        if not cls.__check_state_value(state):
-            return None
+        state = cls.__check_state_value(state)
         data = {
             "state": state,
             "activity": activity,
@@ -48,8 +49,13 @@ class Request(BaseModel):
             "created_at": datetime.datetime.now()
         }
         query: ModelInsert = super(Request, cls).insert(data, **insert)
-        request = query.execute()
+        request_id = query.execute()
+        request = cls.get_by_id(request_id)
         return request
+
+    @classmethod
+    def get_attempting_requests(cls) -> List["Request"]:
+        return list(cls.select().where(Request.state == Request.ATTEMPTING))
 
     def update_state(self, state: str) -> bool:
         if not Request.__check_state_value(state):

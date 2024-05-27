@@ -14,6 +14,9 @@ class Room(BaseModel):
     activity: Activity = ForeignKeyField(Activity, backref=backref)
     created_at = DateTimeField()
 
+    DELTA_MINUTES = 30
+    DIFF_TIMEZONE = 2
+
     class Meta:
         table_name = 'rooms'
 
@@ -21,12 +24,17 @@ class Room(BaseModel):
     def insert(cls, activity: "Activity", **insert) -> "Room":
         data = {
             "activity": activity,
-            "created_at": datetime.datetime.now()
+            "created_at": datetime.datetime.now() + datetime.timedelta(hours=cls.DIFF_TIMEZONE)
         }
         query: ModelInsert = super(Room, cls).insert(data, **insert)
-        room = query.execute()
+        room_id = query.execute()
+        room = cls.get_by_id(room_id)
         return room
     
     def get_participants(self) -> List["Participant"]:
         return list(self.participants)
+    
+    def get_rdv_time(self):
+        rdv_time: datetime.datetime = self.created_at + datetime.timedelta(minutes=self.DELTA_MINUTES)
+        return rdv_time.strftime("%H:%M")
         

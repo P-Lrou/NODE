@@ -24,7 +24,8 @@ class Participant(BaseModel):
             "room": room
         }
         query: ModelInsert = super(Participant, cls).insert(data, **insert)
-        participant = query.execute()
+        participant_id = query.execute()
+        participant = cls.get_by_id(participant_id)
         return participant
 
         

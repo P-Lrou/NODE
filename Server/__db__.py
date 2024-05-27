@@ -15,8 +15,8 @@ member = Member.get_last_member_by_name("michel")
 #     if request.has_exceeded_the_time_limit():
 #         request.update_state(Request.REFUSED)
 
-# room = Room.insert(activity)
-room = activity.get_rooms()[0]
+Room.truncate_table()
+room = Room.insert(activity)
 # participant = Participant.insert(member, room)
-participant = room.get_participants()[0]
-print(participant.member.name)
+# participant = room.get_participants()[0]
+print(room.get_rdv_time())
