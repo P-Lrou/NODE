@@ -53,7 +53,7 @@ class IOTManager:
     def start(self):
         try:
             self.ws_client.start()
-            self.run_checks()
+            # self.run_checks()
             while True:
                 if self.ws_client.connected:
                     self.rfid_controller.process()
