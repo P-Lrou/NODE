@@ -32,7 +32,7 @@ class LEDController:
                 if isinstance(pin_by_name, dict):
                     self.key_type = str
                     if pin_by_name:
-                        for name, pin_number in enumerate(pin_by_name):
+                        for name, pin_number in pin_by_name.items():
                             if pin_number != 0:
                                 led = Led(pin_number)
                                 self.leds.append(led)
