@@ -5,8 +5,8 @@ class LedPins:
 
     def __init__(self):
         self.trafic_number: list[int] = [14]
-        self.good_rfid_number: list[int] = [20, 1, 23]
-        self.error_rfid_number: list[int] = [21, 7, 24]
+        self.good_rfid_number: list[int] = [23, 7, 20]
+        self.error_rfid_number: list[int] = [24, 1, 21]
         
         rfid_ids = RfidPins.instance().rfid_number
         if len(self.good_rfid_number) == len(rfid_ids):

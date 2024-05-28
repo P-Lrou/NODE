@@ -2,10 +2,10 @@ import subprocess
 from tools.DLog import DLog
 
 class PlaySound:
-    join_file = 'import/sound/discord_join.wav'
-    leave_file = 'import/sound/discord_leave.wav'
-    print_file = 'import/sound/print.wav'
-    error_file = 'import/sound/error.wav'
+    join_file = 'ressources/sound/discord_join.wav'
+    leave_file = 'ressources/sound/discord_leave.wav'
+    print_file = 'ressources/sound/print.wav'
+    error_file = 'ressources/sound/error.wav'
 
     @staticmethod
     def set_volume(volume):
@@ -31,7 +31,7 @@ class PlaySound:
     
     @staticmethod
     def print():
-        volume = 80
+        volume = 100
         PlaySound.play_sound(PlaySound.print_file, volume)
     
     @staticmethod

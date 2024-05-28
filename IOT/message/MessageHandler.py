@@ -42,7 +42,7 @@ class MessageHandler:
                 # LIGHT ON GOOD ACTIVITY LED
                 activity_type = json_message["activity_type"]
                 rfid_id = RfidController.instance().get_rfid_id_by_text(activity_type)
-                time_light_on_seconds = 5
+                time_light_on_seconds = 20
                 self.good_led_activities.on_name(rfid_id)
                 Timer().start(time_light_on_seconds, self.good_led_activities.off_name, rfid_id)
                 #TODO: GENERATE IMAGE
