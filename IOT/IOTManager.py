@@ -17,17 +17,19 @@ class IOTManager:
 
         #* Websocket client
         from wsclient.WSClient import WSClient
+        from wsclient.WebSocketDataSender import WebSocketDataSender
         ws_client_callback = WSClientCallback()
         self.ws_client = WSClient.connectToVPS(ws_client_callback)
+        ws_data_sender = WebSocketDataSender(self.ws_client)
 
         #* Rfid reader
         from rfid.RfidController import RfidController
-        rfid_callback = RfidCallback(self.ws_client)
+        rfid_callback = RfidCallback(ws_data_sender)
         self.rfid_controller = RfidController.instance(rfid_callback)
 
-        from button.MyButton import MyButton
-        button_callback = ButtonCallback(self.ws_client)
-        self.button = MyButton(18, "belotte", button_callback)
+        from button.Button import Button
+        button_send_ws_data = ButtonSendWSData(ws_data_sender)
+        self.sending_button = Button(ButtonPins.instance().sending_button_number, button_send_ws_data)
 
     def run_checks(self):
         LedDisplayer.setup()
@@ -57,6 +59,6 @@ class IOTManager:
             while True:
                 if self.ws_client.connected:
                     self.rfid_controller.process()
-                    self.button.process()
+                    self.sending_button.process()
         except KeyboardInterrupt:
             DLog.Log("End of the program")
