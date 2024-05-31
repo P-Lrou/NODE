@@ -35,11 +35,28 @@ class RfidCallback(RfidDelegate):
         else:
             DLog.LogError("There is no websocket data sender")
 
-    def __get_request_data(self, activity):
+    def __remove_data(self, data):
+        if self.ws_data_sender:
+            if data:
+                self.ws_data_sender.remove_data(data)
+            else:
+                DLog.LogError("There is no data to remove")
+        else:
+            DLog.LogError("There is no websocket data sender")
+
+    def __get_request_data(self, activity: str):
         data = {
             "type": "activity",
             "activity_type": activity,
             "state": "request"
+        }
+        return data
+    
+    def __get_cancel_data(self, activity: str):
+        data = {
+            "type": "activity",
+            "activity_type": activity,
+            "state": "cancel"
         }
         return data
 
@@ -63,8 +80,8 @@ class RfidCallback(RfidDelegate):
         activity = self.define_activity(rfid)
         if activity is not None:
             DLog.Log(f"{activity} placed")
-            data = self.__get_request_data(activity)
-            self.ws_data_sender.new_data(data)
+            self.__remove_data(self.__get_cancel_data(activity))
+            self.__send_data(self.__get_request_data(activity))
 
 
     def rfid_removed(self, rfid):
@@ -72,13 +89,8 @@ class RfidCallback(RfidDelegate):
         activity = self.define_activity(rfid)
         if activity is not None:
             DLog.Log(f"{activity} removed")
-            self.ws_data_sender.remove_data(self.__get_request_data(activity))
-            data = {
-                "type": "activity",
-                "activity_type": activity,
-                "state": "cancel"
-            }
-            self.__send_data(data)
+            self.__remove_data(self.__get_request_data(activity))
+            self.__send_data(self.__get_cancel_data(activity))
 
 
 #* Rfid reader
