@@ -3,10 +3,9 @@ from tools.DLog import DLog
 
 class Button:
     def __init__(self, pin: int, delegate=None):
-        self.pin: int = pin
-        self.has_joined: bool = False
         self.button_pressed: bool = False
         self.delegate = delegate
+        self.pin: int = pin
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     
     def process(self):
@@ -15,5 +14,5 @@ class Button:
             self.has_joined = not self.has_joined
             if self.delegate:
                 self.delegate.on_clicked(self)
-        self.button_pressed = input_state
+            self.button_pressed = input_state
 

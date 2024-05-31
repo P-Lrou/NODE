@@ -27,6 +27,7 @@ class IOTManager:
         rfid_callback = RfidCallback(ws_data_sender)
         self.rfid_controller = RfidController.instance(rfid_callback)
 
+        #* Button to send requests
         from button.Button import Button
         button_send_ws_data = ButtonSendWSData(ws_data_sender)
         self.sending_button = Button(ButtonPins.instance().sending_button_number, button_send_ws_data)
