@@ -3,7 +3,7 @@ import board
 import neopixel
 import threading
 
-class RingLed:
+class NeoLed:
     def __init__(self) -> None:
         self.pixel_pin = board.D18
         self.num_pixels = 24
@@ -17,7 +17,7 @@ class RingLed:
     def _start_thread(self, target, args=()):
         if self.running:
             self.stop()
-            time.sleep(0.1)  # Petit délai pour s'assurer que le thread précédent est arrêté
+            time.sleep(0.1)  # Small delay to ensure that the previous thread is stopped
         self.running = True
         self.current_thread = threading.Thread(target=target, args=args)
         self.current_thread.start()
@@ -50,29 +50,29 @@ class RingLed:
                 self._set_all_pixels((r * brightness // 255, g * brightness // 255, b * brightness // 255))
                 time.sleep(wait)
         
-    def fill(self, color):
+    def fill(self, color, brightness=1):
         self.stop()
-        self._set_all_pixels(color)
+        self._set_all_pixels(color, brightness)
 
-    def _set_all_pixels(self, color):
-        self.pixels.fill(color)
+    def _set_all_pixels(self, color, brightness=1):
+        r, g, b = color
+        self.pixels.fill((int(r * brightness), int(g * brightness), int(b * brightness)))
         self.pixels.show()
 
     def stop(self):
         self.running = False
         if self.current_thread is not None:
-            self.current_thread.join()  # Attendre que le thread actuel se termine
+            self.current_thread.join()  # Wait for the current thread to end
         self._set_all_pixels((0, 0, 0))
 
 if __name__ == "__main__":
-    # Exemple d'utilisation
-    ring_led = RingLed()
+    # Example of use
+    ring_led = NeoLed()
     try:
-        # ring_led.pulse((0, 0, 255))  # Lance l'effet de pulsation en bleu
-        # time.sleep(5)  # Attendre 5 secondes avant de passer à l'effet suivant
-        ring_led.circle((0, 255, 0), wait=0.05)  # Lance l'effet cercle
-        # time.sleep(5)
-        time.sleep(60)
+        ring_led.pulse((0, 0, 255))  # Starts the pulsation effect in blue
+        time.sleep(5)  # Wait 5 seconds before moving on to the next effect
+        ring_led.circle((0, 255, 0), wait=0.05)  # Starts the circle effect
+        time.sleep(5)
     finally:
-        ring_led.stop()  # Arrêter les effets
+        ring_led.stop()  # Stop the effects
 
