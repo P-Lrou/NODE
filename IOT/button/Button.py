@@ -9,10 +9,9 @@ class Button:
         GPIO.setup(self.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     
     def process(self):
-        input_state = GPIO.input(self.pin) == GPIO.HIGH
+        input_state = GPIO.input(self.pin) == GPIO.LOW
         if input_state and not self.button_pressed:
-            self.has_joined = not self.has_joined
             if self.delegate:
                 self.delegate.on_clicked(self)
-            self.button_pressed = input_state
+        self.button_pressed = input_state
 

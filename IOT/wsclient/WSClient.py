@@ -1,6 +1,7 @@
 import websocket
 from threading import Thread
 from tools.JSONTools import *
+from tools.DLog import DLog
 
 class WSClient(Thread):
     def __init__(self, uri, delegate=None):
@@ -23,7 +24,7 @@ class WSClient(Thread):
             "uid": self.uid,
             "text": text
         }
-        print(f"Sending message: {message}")
+        DLog.LogWhisper(f"Sending message: {message}")
         message_to_send = json_encode(message)
         if message_to_send:
             self.ws.send(message_to_send)
