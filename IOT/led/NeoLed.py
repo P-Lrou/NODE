@@ -4,9 +4,9 @@ import neopixel
 import threading
 
 class NeoLed:
-    def __init__(self) -> None:
-        self.pixel_pin = board.D18
-        self.num_pixels = 24
+    def __init__(self, pin_number: int, num_pixels: int) -> None:
+        self.pixel_pin = getattr(board, f"D{pin_number}")
+        self.num_pixels = num_pixels
         self.ORDER = neopixel.GRB
         self.pixels = neopixel.NeoPixel(
             self.pixel_pin, self.num_pixels, brightness=0.2, auto_write=False, pixel_order=self.ORDER
@@ -67,7 +67,7 @@ class NeoLed:
 
 if __name__ == "__main__":
     # Example of use
-    ring_led = NeoLed()
+    ring_led = NeoLed(pin_number=18, num_pixels=24)
     try:
         ring_led.pulse((0, 0, 255))  # Starts the pulsation effect in blue
         time.sleep(5)  # Wait 5 seconds before moving on to the next effect
