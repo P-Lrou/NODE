@@ -4,23 +4,23 @@ from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Model.Room import Room
-    from Model.Member import Member
+    from Model.Client import Client
 
 class Participant(BaseModel):
     from Model.Room import Room
-    from Model.Member import Member
+    from Model.Client import Client
     backref = "participants"
     id = IntegerField(primary_key=True)
-    member: Member = ForeignKeyField(Member, backref=backref)
+    client: Client = ForeignKeyField(Client, backref=backref)
     room: Room = ForeignKeyField(Room, backref=backref)
 
     class Meta:
         table_name = 'participants'
 
     @classmethod
-    def insert(cls, member: "Member", room: "Room", **insert) -> "Participant":
+    def insert(cls, client: "Client", room: "Room", **insert) -> "Participant":
         data = {
-            "member": member,
+            "client": client,
             "room": room
         }
         query: ModelInsert = super(Participant, cls).insert(data, **insert)

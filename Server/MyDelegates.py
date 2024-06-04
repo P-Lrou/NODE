@@ -4,8 +4,8 @@ from tools.JSONTools import *
 # WEBSOCKET SERVER
 from WSServer.WSServerDelegate import WSServerDelegate
 from WSServer.ClientHandler import ClientHandler
-# MEMBER MODEL
-from Model.Member import Member
+# CLIENT MODEL
+from Model.Client import Client
 
 class WSServerCallback(WSServerDelegate):
     def __init__(self) -> None:
@@ -17,11 +17,11 @@ class WSServerCallback(WSServerDelegate):
         name = client["uid"]
         if "name" in client:
             name = client["name"]
-        member = Member.insert(name, client["uid"])
-        if member:
-            DLog.LogSuccess("Insert member")
+        new_client = Client.insert(name, client["uid"])
+        if new_client:
+            DLog.LogSuccess("Insert client")
         else:
-            DLog.LogError(f"Fail to insert member with uid: {client['uid']}")
+            DLog.LogError(f"Fail to insert client with uid: {client['uid']}")
 
     def received_message(self, client, server, message: str) -> None:
         super().received_message(client, server, message)
@@ -70,7 +70,7 @@ class WSServerCallback(WSServerDelegate):
         else:
             DLog.LogError("No 'targets' key in data")
 
-    def send_messages(self, server, data_to_send: list[dict]) -> None:
+    def send_messages(self, server, data_to_send: list) -> None:
         for non_typed_data in data_to_send:
             if isinstance(non_typed_data, list):
                 for data in non_typed_data:
