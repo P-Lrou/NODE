@@ -20,11 +20,12 @@ class RfidController:
             rfid.process()
             time.sleep(0.001)
 
-    def get_rfid_id_by_text(self, text: str) -> str:
-        for rfid in self.rfids:
+    def get_rfid_keys_by_text(self, text: str) -> list[int]:
+        valid_keys = []
+        for key, rfid in enumerate(self.rfids):
             if rfid.last_text_read is not None and rfid.last_text_read.startswith(text):
-                return str(rfid.pin)
-        return None
+                valid_keys.append(key)
+        return valid_keys
 
     def process_checker(self):
         return True

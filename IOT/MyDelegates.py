@@ -1,30 +1,20 @@
 from GlobalVariables import *
-from message.MessageHandler import MessageHandler
 from tools.DLog import DLog
 from tools.Timer import Timer
 from tools.JSONTools import *
 
-#* Websocket Client
-from wsclient.WSDelegate import WSDelegate
-
-class WSClientCallback(WSDelegate):
-    def __init__(self) -> None:
-        super().__init__()
-        self.message_handler = MessageHandler()
-
-    def on_message(self, json_message):
-        super().on_message(json_message)
-        self.message_handler.process_message(json_message)
-
-
 #* Rfid reader
 from rfid.RfidDelegate import RfidDelegate
 
-class RfidCallback(RfidDelegate):
+class RfidDockCallback(RfidDelegate):
     def __init__(self, ws_client=None) -> None:
         super().__init__()
         self.ws_client = ws_client
         self.timeout_request_seconds = 10
+        self.dock = None
+
+    def set_dock(self, dock=None):
+        self.dock = dock
 
     def __send_data(self, data, is_last: bool = False):
         if self.ws_client:
@@ -49,9 +39,20 @@ class RfidCallback(RfidDelegate):
     def define_activity(self, rfid) -> str:
         if rfid.last_text_read is not None:
             if len(rfid.last_text_read) != 0:
+                data: list[str] = rfid.last_text_read.split(":")
+                activity_type = ""
+                color_name = ""
+                if len(data) > 1:
+                    activity_type = data[0]
+                    color_name = data[1]
+                else:
+                    activity_type = data[0]
                 activities: list[str] = Activities.instance().activities
                 for activity in activities:
-                    if rfid.last_text_read.startswith(activity):
+                    if rfid.last_text_read == activity:
+                        if self.dock is not None:
+                            self.dock.activity = activity_type
+                            self.dock.color_name = color_name
                         return activity
                 DLog.LogError(f"Unkown activity. Text: {rfid.last_text_read}")
             else:

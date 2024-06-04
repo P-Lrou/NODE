@@ -2,11 +2,13 @@ from GlobalVariables import *
 from MyDelegates import *
 from tools.DLog import DLog
 from tools.LedDisplayer import LedDisplayer
+from message.MessageHandler import MessageHandler
+from wsclient.WSDelegate import WSDelegate
 import RPi.GPIO as GPIO
 import sys
 import time
 
-class IOTManager:
+class IOTManager(WSDelegate):
     def __del__(self):
         GPIO.cleanup()
 
@@ -17,14 +19,15 @@ class IOTManager:
 
         #* Websocket client
         from wsclient.WSClient import WSClient
-        ws_client_callback = WSClientCallback()
-        self.ws_client = WSClient.connectToVPS(ws_client_callback)
+        self.message_handler = MessageHandler(self)
+        self.ws_client = WSClient.connectToVPS(self)
 
-        #* Rfid reader
-        from rfid.RfidController import RfidController
-        rfid_callback = RfidCallback(self.ws_client)
-        self.rfid_controller = RfidController.instance(rfid_callback)
+        #* Dock
+        from dock.DockController import DockController
+        rfid_dock_callback = RfidDockCallback(self.ws_client)
+        self.dock_controller = DockController(rfid_dock_callback)
 
+        #* Button
         from button.MyButton import MyButton
         button_callback = ButtonCallback(self.ws_client)
         self.button = MyButton(18, "belotte", button_callback)
@@ -32,7 +35,7 @@ class IOTManager:
     def run_checks(self):
         LedDisplayer.setup()
         LedDisplayer.new_test_sequence()
-        if self.rfid_controller.process_checker():
+        if True:  # self.rfid_controller.process_checker():
             LedDisplayer.test_passed()
         else:
             LedDisplayer.test_failed()
@@ -56,7 +59,14 @@ class IOTManager:
             # self.run_checks()
             while True:
                 if self.ws_client.connected:
-                    self.rfid_controller.process()
+                    self.dock_controller.process()
                     self.button.process()
         except KeyboardInterrupt:
             DLog.Log("End of the program")
+
+    def on_message(self, json_message):
+        super().on_message(json_message)
+        self.message_handler.process_message(json_message)
+
+    def get_dock_by_activity(self, activity_type: str):
+        return self.dock_controller.get_dock_by_activity(activity_type)
