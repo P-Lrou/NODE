@@ -40,7 +40,7 @@ class Rfid(CheckerInterface):
         self.__open()
         id, text = self.reader.read_no_block()
         if id:
-            self.last_text_read = text
+            self.last_text_read = text.strip()
             rfid_data = {
                 "id": id,
                 "text": text.replace(" ", "")

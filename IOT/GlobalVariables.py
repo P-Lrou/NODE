@@ -1,4 +1,5 @@
 from tools.DLog import DLog
+import time
 
 class Singleton:
     _instance = None
@@ -26,14 +27,22 @@ class LedPins(Singleton):
         else:
             DLog.LogError("No length matching between error_rfid_number and rfid_ids")
     
+    
 class RfidPins(Singleton):
-    def __init__(self) -> None:
-        self.rfid_number = [2, 3, 4]
+  def __init__(self) -> None:
+    self.rfid_number = [2, 3, 4]
+    
+    
+class NeoLedPins(Singleton):
+    def __init__(self):
+        self.pin_number: list[int] = [10, 12, 18]    
 
+          
 class ButtonPins(Singleton):
     def __init__(self) -> None:
         self.sending_button_number = 16
 
+        
 class Activities(Singleton):
     def __init__(self):
         self.activities = [
