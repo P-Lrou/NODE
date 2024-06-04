@@ -13,6 +13,7 @@ class MessageHandler:
             if json_message["type"] == "new_request":
                 pass
             elif json_message["type"] == "join":
+                activity_type = json_message["activity_type"]
                 # PLAY JOIN SOUND
                 PlaySound.join()
                 # LIGHT ON RING LED
@@ -22,6 +23,7 @@ class MessageHandler:
                     dock.launch_circle()
                 pass
             elif json_message["type"] == "leave":
+                activity_type = json_message["activity_type"]
                 # PLAY LEAVE SOUND
                 PlaySound.leave()
                 # LIGHT OFF RING LEDS
@@ -31,6 +33,7 @@ class MessageHandler:
                     dock.launch_circle()
                 pass
             elif json_message["type"] == "found":
+                activity_type = json_message["activity_type"]
                 # PLAY PRINTING SOUND
                 PlaySound.print()
                 # LIGHT ON RING LED

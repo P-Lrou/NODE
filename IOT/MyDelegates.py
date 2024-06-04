@@ -1,38 +1,52 @@
 from GlobalVariables import *
 from tools.DLog import DLog
-from tools.Timer import Timer
 from tools.JSONTools import *
+from wsclient.WebSocketDataSender import WebSocketDataSender
 
 #* Rfid reader
 from rfid.RfidDelegate import RfidDelegate
 
 class RfidDockCallback(RfidDelegate):
-    def __init__(self, ws_client=None) -> None:
+    def __init__(self, ws_data_sender: WebSocketDataSender = None) -> None:
         super().__init__()
-        self.ws_client = ws_client
+        self.ws_data_sender = ws_data_sender
         self.timeout_request_seconds = 10
         self.dock = None
 
     def set_dock(self, dock=None):
         self.dock = dock
 
-    def __send_data(self, data, is_last: bool = False):
-        if self.ws_client:
+    def __send_data(self, data):
+        if self.ws_data_sender:
             if data:
-                data["is_last"] = is_last
-                message = json_encode(data)
-                if message:
-                    self.ws_client.send_message(message)
+                self.ws_data_sender.new_data(data)
             else:
                 DLog.LogError("There is no data to send")
         else:
-            DLog.LogError("Fail to send message")
+            DLog.LogError("There is no websocket data sender")
 
-    def __get_request_data(self, activity):
+    def __remove_data(self, data):
+        if self.ws_data_sender:
+            if data:
+                self.ws_data_sender.remove_data(data)
+            else:
+                DLog.LogError("There is no data to remove")
+        else:
+            DLog.LogError("There is no websocket data sender")
+
+    def __get_request_data(self, activity: str):
         data = {
             "type": "activity",
             "activity_type": activity,
             "state": "request"
+        }
+        return data
+    
+    def __get_cancel_data(self, activity: str):
+        data = {
+            "type": "activity",
+            "activity_type": activity,
+            "state": "cancel"
         }
         return data
 
@@ -57,7 +71,7 @@ class RfidDockCallback(RfidDelegate):
                 DLog.LogError(f"Unkown activity. Text: {rfid.last_text_read}")
             else:
                 DLog.LogError("Erreur pour retirer le badge")
-                #TODO: VOIR AVEC LES DESIGNER SI JE COUPE LE TIMER OU NON
+                #TODO: VOIR AVEC LES DESIGNER SI JE COUPE LE TIMER OU NON // ATTENTION IL Y A PLUS DE TIMER
         else:
             DLog.LogError("No text has been read yet")
         return None
@@ -67,8 +81,8 @@ class RfidDockCallback(RfidDelegate):
         activity = self.define_activity(rfid)
         if activity is not None:
             DLog.Log(f"{activity} placed")
-            data = self.__get_request_data(activity)
-            Timer.instance().start(self.timeout_request_seconds, self.__send_data, data)
+            self.__remove_data(self.__get_cancel_data(activity))
+            self.__send_data(self.__get_request_data(activity))
 
 
     def rfid_removed(self, rfid):
@@ -76,25 +90,18 @@ class RfidDockCallback(RfidDelegate):
         activity = self.define_activity(rfid)
         if activity is not None:
             DLog.Log(f"{activity} removed")
-            if Timer.instance().is_running():
-                Timer.instance().pop_callback(self.__send_data, self.__get_request_data(activity))
-            else:
-                data = {
-                    "type": "activity",
-                    "activity_type": activity,
-                    "state": "cancel"
-                }
-                self.__send_data(data)
+            self.__remove_data(self.__get_request_data(activity))
+            self.__send_data(self.__get_cancel_data(activity))
 
 
 #* Rfid reader
 from button.ButtonDelegate import ButtonDelegate
 
-class ButtonCallback(ButtonDelegate):
-    def __init__(self, ws_client=None) -> None:
+class ButtonSendWSData(ButtonDelegate):
+    def __init__(self, ws_data_sender: WebSocketDataSender = None) -> None:
         super().__init__()
-        self.ws_client = ws_client
+        self.ws_data_sender = ws_data_sender
 
     def on_clicked(self, button) -> None:
         super().on_clicked(button)
-        self.ws_client.send_message(json_encode(button.get_data()))
+        self.ws_data_sender.send_data()

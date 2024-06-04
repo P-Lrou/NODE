@@ -21,16 +21,17 @@ class IOTManager(WSDelegate):
         from wsclient.WSClient import WSClient
         self.message_handler = MessageHandler(self)
         self.ws_client = WSClient.connectToVPS(self)
-
+        ws_data_sender = WebSocketDataSender(self.ws_client)
+        
         #* Dock
         from dock.DockController import DockController
         rfid_dock_callback = RfidDockCallback(self.ws_client)
         self.dock_controller = DockController(rfid_dock_callback)
 
-        #* Button
-        from button.MyButton import MyButton
-        button_callback = ButtonCallback(self.ws_client)
-        self.button = MyButton(18, "belotte", button_callback)
+        #* Button to send requests
+        from button.Button import Button
+        button_send_ws_data = ButtonSendWSData(ws_data_sender)
+        self.sending_button = Button(ButtonPins.instance().sending_button_number, button_send_ws_data)
 
     def run_checks(self):
         LedDisplayer.setup()
@@ -60,7 +61,7 @@ class IOTManager(WSDelegate):
             while True:
                 if self.ws_client.connected:
                     self.dock_controller.process()
-                    self.button.process()
+                    self.sending_button.process()
         except KeyboardInterrupt:
             DLog.Log("End of the program")
 
