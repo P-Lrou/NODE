@@ -1,4 +1,5 @@
 from tools.DLog import DLog
+import time
 
 class LedPins:
     _instance = None
@@ -21,6 +22,18 @@ class LedPins:
 
     @classmethod
     def instance(cls) -> "LedPins":
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+    
+class NeoLedPins:
+    _instance = None
+
+    def __init__(self):
+        self.pin_number: list[int] = [10, 12, 18]
+
+    @classmethod
+    def instance(cls) -> "NeoLedPins":
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance

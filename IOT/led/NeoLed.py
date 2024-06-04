@@ -5,7 +5,7 @@ import threading
 
 class NeoLed:
     def __init__(self, pin_number: int, num_pixels: int) -> None:
-        self.good_pin_number: list[int] = [10, 12, 18, 21]
+        self.good_pins_number: list[int] = [10, 12, 18, 21]
         self.pixel_pin = self._check_good_pin_number(pin_number)
         self.num_pixels = num_pixels
         self.ORDER = neopixel.GRB
@@ -16,8 +16,8 @@ class NeoLed:
         self.current_thread = None
 
     def _check_good_pin_number(self, pin_number: int):
-        if pin_number not in self.good_pin_number:
-            pin_number = self.good_pin_number[0]
+        if pin_number not in self.good_pins_number:
+            pin_number = self.good_pins_number[0]
         return getattr(board, f"D{pin_number}")
 
     def _start_thread(self, target, args=()):
