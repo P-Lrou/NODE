@@ -27,6 +27,11 @@ class LedPins(Singleton):
         else:
             DLog.LogError("No length matching between error_rfid_number and rfid_ids")
     
+class NeoLedPins(Singleton):
+    def __init__(self):
+        self.pin_number: int = 21
+        self.nums_pixels: list[int] = [24, 24, 24]
+        self.total_pixels: int = 72
     
 class RfidPins(Singleton):
   def __init__(self) -> None:

@@ -1,7 +1,6 @@
 from led.NeoLed import NeoLed
 from led.NeoLedStrategy import *
 import time
-
 ring_led = NeoLed(pin_number=21, num_pixels=24)
 effect = True  # Boolean to switch between circle and pulse
 

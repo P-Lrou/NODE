@@ -1,4 +1,5 @@
 import time
+from led.ActualPixels import ActualPixels
 
 class Strategy:
     def __init__(self, neo_led):
@@ -17,9 +18,11 @@ class CircleStrategy(Strategy):
     def execute(self):
         brightness_levels = [i / self.neo_led.num_pixels for i in range(self.neo_led.num_pixels)]
         r, g, b = self.color
+        self.neo_led._get_actual_pixels()
         for i in range(self.neo_led.num_pixels):
             brightness = brightness_levels[(i + self.step) % self.neo_led.num_pixels]
             self.neo_led.pixels[i + self.neo_led.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
+            ActualPixels.instance().pixels[str(self.neo_led.pixel_pin)][i + self.neo_led.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
         self.neo_led.pixels.show()
         self.step = (self.step + 1) % self.neo_led.num_pixels
         time.sleep(self.wait)

@@ -14,11 +14,13 @@ class Printer:
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     @staticmethod
-    def switch_state(pin=18):
+    def switch_state(pin=14):
         GPIO.output(pin, GPIO.HIGH)
         time.sleep(3)
         GPIO.output(pin, GPIO.LOW)
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18, GPIO.OUT)
-Printer.switch_state()
+if __name__ == "__main__":
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(14, GPIO.OUT)
+    Printer.switch_state()
+    GPIO.cleanup()
