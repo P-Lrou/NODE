@@ -6,10 +6,11 @@ import spidev
 import time
 
 class Rfid(CheckerInterface):
-    def __init__(self, pin: int, delegate: RfidDelegate = None, bus=0, device=0, spd=1000000) -> None:
+    def __init__(self, pin: int, delegate: RfidDelegate = None, bus=0, device=0, spd=1000000, parent=None) -> None:
         self.pin = pin
         GPIO.setup(pin, GPIO.OUT)
         self.delegate = delegate
+        self.parent = parent
 
         self.reader = SimpleMFRC522()
         self.bus = bus

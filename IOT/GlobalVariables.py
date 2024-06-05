@@ -1,9 +1,16 @@
 from tools.DLog import DLog
 import time
 
-class LedPins:
+class Singleton:
     _instance = None
 
+    @classmethod
+    def instance(cls):
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+class LedPins(Singleton):
     def __init__(self):
         self.trafic_number: list[int] = [14]
         self.good_rfid_number: list[int] = [23, 7, 20]
@@ -19,42 +26,30 @@ class LedPins:
             self.error_rfid_led_number: dict[str, int] = {str(id): self.error_rfid_number[key] for key, id in enumerate(rfid_ids)}
         else:
             DLog.LogError("No length matching between error_rfid_number and rfid_ids")
-
-    @classmethod
-    def instance(cls) -> "LedPins":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
     
-class NeoLedPins:
-    _instance = None
-
+class NeoLedPins(Singleton):
     def __init__(self):
         self.pin_number: int = 21
         self.nums_pixels: list[int] = [24, 24, 24]
         self.total_pixels: int = 72
-
-    @classmethod
-    def instance(cls) -> "NeoLedPins":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
     
-class RfidPins:
-    _instance = None
+class RfidPins(Singleton):
+  def __init__(self) -> None:
+    self.rfid_number = [2, 3, 4]
+    
+    
+class NeoLedPins(Singleton):
+    def __init__(self):
+        self.pin_number: int = 21
+        self.nums_pixels: list[int] = [24, 24, 24]
 
+          
+class ButtonPins(Singleton):
     def __init__(self) -> None:
-        self.rfid_number = [2, 3, 4]
+        self.sending_button_number = 16
 
-    @classmethod
-    def instance(cls) -> "RfidPins":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
-
-class Activities:
-    _instance = None
-
+        
+class Activities(Singleton):
     def __init__(self):
         self.activities = [
             "belote",
@@ -64,9 +59,3 @@ class Activities:
             "petanque",
             "promenade"
         ]
-
-    @classmethod
-    def instance(cls) -> "Activities":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance

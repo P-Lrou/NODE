@@ -1,6 +1,6 @@
 import subprocess
-import time
 import RPi.GPIO as GPIO
+import time
 
 class Printer:
     @staticmethod

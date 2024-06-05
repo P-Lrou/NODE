@@ -29,7 +29,7 @@ class NeoLed:
     def circle(self, color, wait=0.1):
         self.set_strategy(CircleStrategy(self, color, wait))
     
-    def pulse(self, color, wait=0.1):
+    def pulse(self, color, wait=0.01):
         self.set_strategy(PulseStrategy(self, color, wait))
 
     def fill(self, color, brightness=1):

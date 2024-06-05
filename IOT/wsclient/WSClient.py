@@ -3,7 +3,6 @@ from threading import Thread, Event
 import json
 import time
 
-
 class WSClient(Thread):
     def __init__(self, uri, delegate=None):
         super().__init__()

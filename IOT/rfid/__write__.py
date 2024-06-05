@@ -60,12 +60,12 @@ class NFC():
 
 if __name__ == "__main__":
     activities = [
-        "belote",
-        "triomino",
-        "scrabble",
-        "gouter",
-        "petanque",
-        "promenade"
+        "belote:red",
+        "triomino:blue",
+        "scrabble:yellow",
+        "gouter:pink",
+        "petanque:purple",
+        "promenade:green"
     ]
     GPIO.setmode(GPIO.BCM)
     nfc = NFC()

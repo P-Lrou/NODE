@@ -18,7 +18,6 @@ class DockController:
     def process(self) -> None:
         for dock in self.docks:
             dock.process()
-            time.sleep(0.001)
 
     def get_dock_by_activity(self, activity_type: str) -> Dock:
         for dock in self.docks:
