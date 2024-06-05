@@ -1,16 +1,24 @@
+<<<<<<< Updated upstream
 import time
+=======
+>>>>>>> Stashed changes
 import board
 import neopixel
 import threading
 
 class NeoLed:
+<<<<<<< Updated upstream
     def __init__(self, pin_number: int, num_pixels: int) -> None:
+=======
+    def __init__(self, pin_number: int, num_pixels: int = 1, starting_pixel: int = 0, total_pixels: int = 72) -> None:
+>>>>>>> Stashed changes
         self.good_pins_number: list[int] = [10, 12, 18, 21]
         self.pixel_pin = self._check_good_pin_number(pin_number)
         self.num_pixels = num_pixels
         self.ORDER = neopixel.GRB
+        ActualPixels.instance().pixels[str(self.pixel_pin)] = [(0, 0, 0) for _ in range(total_pixels)]
         self.pixels = neopixel.NeoPixel(
-            self.pixel_pin, self.num_pixels, brightness=0.2, auto_write=False, pixel_order=self.ORDER
+            self.pixel_pin, total_pixels, brightness=0.2, auto_write=False, pixel_order=self.ORDER
         )
         self.running = False
         self.current_thread = None
@@ -20,6 +28,7 @@ class NeoLed:
             pin_number = self.good_pins_number[0]
         return getattr(board, f"D{pin_number}")
 
+<<<<<<< Updated upstream
     def _start_thread(self, target, args=()):
         if self.running:
             self.stop()
@@ -30,6 +39,19 @@ class NeoLed:
 
     def circle(self, color, wait=0.1):
         self._start_thread(self._run_circle, (color, wait))
+=======
+    def set_strategy(self, strategy):
+        self.strategy = strategy
+
+    def execute(self):
+        self.strategy.execute()
+
+    def circle(self, color, wait=0.1):
+        self.set_strategy(CircleStrategy(self, color, wait))
+    
+    def pulse(self, color, wait=0.1):
+        self.set_strategy(PulseStrategy(self, color, wait))
+>>>>>>> Stashed changes
 
     def _run_circle(self, color, wait):
         brightness_levels = [i / self.num_pixels for i in range(self.num_pixels)]
@@ -60,8 +82,13 @@ class NeoLed:
         self.stop()
         self._set_all_pixels(color, brightness)
 
+    def _get_actual_pixels(self):
+        for i in range(len(ActualPixels.instance().pixels[str(self.pixel_pin)])):
+            self.pixels[i] = ActualPixels.instance().pixels[str(self.pixel_pin)][i]
+
     def _set_all_pixels(self, color, brightness=1):
         r, g, b = color
+<<<<<<< Updated upstream
         self.pixels.fill((int(r * brightness), int(g * brightness), int(b * brightness)))
         self.pixels.show()
 
@@ -82,3 +109,13 @@ if __name__ == "__main__":
     finally:
         ring_led.stop()  # Stop the effects
 
+=======
+        self._get_actual_pixels()
+        for i in range(self.num_pixels):
+            self.pixels[i + self.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
+            ActualPixels.instance().pixels[str(self.pixel_pin)][i + self.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
+        self.pixels.show()
+
+    def stop(self):
+         self.set_strategy(NoneStrategy(self))
+>>>>>>> Stashed changes
