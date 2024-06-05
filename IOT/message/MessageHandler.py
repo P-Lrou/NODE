@@ -18,8 +18,7 @@ class MessageHandler:
                 activity_type = json_message["activity_type"]
                 if self.parent:
                     dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    print(f"dock: {dock}")
-                    dock.launch_circle()
+                    dock.launch_fill()
                 pass
             elif json_message["type"] == "leave":
                 activity_type = json_message["activity_type"]
@@ -29,7 +28,7 @@ class MessageHandler:
                 activity_type = json_message["activity_type"]
                 if self.parent:
                     dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_circle()
+                    dock.launch_stop()
                 pass
             elif json_message["type"] == "found":
                 activity_type = json_message["activity_type"]
@@ -39,7 +38,10 @@ class MessageHandler:
                 activity_type = json_message["activity_type"]
                 if self.parent:
                     dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_circle()
+                    dock.launch_success()
+                    docks: list[Dock] = self.parent.get_docks_by_non_activity(activity_type)
+                    for dock in docks:
+                        dock.launch_stop()
                 #TODO: GENERATE IMAGE
                 image_path = "ressources/images/ticket_imprimante.png"
                 # PRINT IMAGE
@@ -50,8 +52,9 @@ class MessageHandler:
                 # BLINKING ERROR ACTIVITY LED
                 activity_type = json_message["activity_type"]
                 if self.parent:
-                    dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_circle()
+                    docks: list[Dock] = self.parent.get_docks()
+                    for dock in docks:
+                        dock.launch_error()
                 pass
             else:
                 PlaySound.error()

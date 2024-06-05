@@ -72,3 +72,9 @@ class IOTManager(WSDelegate):
 
     def get_dock_by_activity(self, activity_type: str):
         return self.dock_controller.get_dock_by_activity(activity_type)
+    
+    def get_docks_by_non_activity(self, activity_type: str):
+        return self.dock_controller.get_docks_by_non_activity(activity_type)
+
+    def get_docks(self):
+        return self.dock_controller.docks

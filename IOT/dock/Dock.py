@@ -1,4 +1,5 @@
 from tools.DLog import DLog
+from tools.Color import Color
 from rfid.Rfid import Rfid
 from led.NeoLed import NeoLed
 
@@ -20,7 +21,6 @@ class Dock:
         if self.rfid is not None:
             self.rfid.process()
             if self.ring_led is not None:
-                print(f"pin: {self.ring_led.pixel_pin} // strategy: {self.ring_led.strategy.__class__.__name__}")
                 self.ring_led.execute()
             else:
                 DLog.LogError("Error to execute ring_led! self.ring_led is None")
@@ -32,19 +32,31 @@ class Dock:
         
     def launch_circle(self):
         if self.ring_led is not None:
-            self.ring_led.circle((0, 255, 0), wait=0)
+            self.ring_led.circle(Color.get_color_by_text(self.activity), wait=0)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_pulse(self):
         if self.ring_led is not None:
-            self.ring_led.pulse((0, 0, 255), wait=0)
+            self.ring_led.pulse(Color.get_color_by_text(self.activity), wait=0)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_fill(self):
         if self.ring_led is not None:
-            self.ring_led.fill((255, 0, 0))
+            self.ring_led.fill(Color.get_color_by_text(self.activity))
+        else:
+            DLog.LogError("Error: self.ring_led is None")
+
+    def launch_error(self):
+        if self.ring_led is not None:
+            self.ring_led.pulse((255, 0, 0))
+        else:
+            DLog.LogError("Error: self.ring_led is None")
+    
+    def launch_success(self):
+        if self.ring_led is not None:
+            self.ring_led.pulse((0, 255, 0))
         else:
             DLog.LogError("Error: self.ring_led is None")
 
@@ -53,7 +65,3 @@ class Dock:
             self.ring_led.stop()
         else:
             DLog.LogError("Error: self.ring_led is None")
-            
-    def execute_led(self):
-        if self.ring_led is not None:
-            self.ring_led.execute()

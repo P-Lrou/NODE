@@ -24,3 +24,10 @@ class DockController:
             if dock.has_activity(activity_type):
                 return dock
         return None
+    
+    def get_docks_by_non_activity(self, activity_type: str) -> list:
+        valid_docks: list[Dock] = []
+        for dock in self.docks:
+            if not dock.has_activity(activity_type):
+                valid_docks.append(dock)
+        return valid_docks
