@@ -16,13 +16,8 @@ class Dock:
             self.rfid_dock_callback.set_dock(self)
         self.rfid = Rfid(pin_number, self.rfid_dock_callback)
 
-<<<<<<< Updated upstream
-    def set_ring_led(self, pin_number: int) -> None:
-        self.ring_led = NeoLed(pin_number, self.num_pixels)
-=======
     def set_ring_led(self, pin_number: int, num_pixels: int, starting_pixel: int = 0, total_pixels: int = 72) -> None:
         self.ring_led = NeoLed(pin_number, num_pixels, starting_pixel, total_pixels)
->>>>>>> Stashed changes
 
     def process(self) -> None:
         if self.rfid is not None:
@@ -37,12 +32,6 @@ class Dock:
         pass
 
     def launch_pulse(self):
-<<<<<<< Updated upstream
-        pass
-
-    def launch_fill(self):
-        pass
-=======
         if self.ring_led is not None:
             self.ring_led.pulse((0, 0, 255), wait=0)
         else:
@@ -63,4 +52,3 @@ class Dock:
     def execute_led(self):
         if self.ring_led is not None:
             self.ring_led.execute()
->>>>>>> Stashed changes
