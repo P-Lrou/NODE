@@ -29,7 +29,10 @@ class Dock:
         return self.activity == activity_type
         
     def launch_circle(self):
-        pass
+        if self.ring_led is not None:
+            self.ring_led.circle((0, 255, 0), wait=0)
+        else:
+            DLog.LogError("Error: self.ring_led is None")
 
     def launch_pulse(self):
         if self.ring_led is not None:
