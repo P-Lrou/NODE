@@ -1,5 +1,4 @@
 from GlobalVariables import *
-from tools.Timer import Timer
 from tools.Sound import PlaySound
 from tools.Printer import Printer
 from dock.Dock import Dock
@@ -13,13 +12,13 @@ class MessageHandler:
             if json_message["type"] == "new_request":
                 pass
             elif json_message["type"] == "join":
-                activity_type = json_message["activity_type"]
                 # PLAY JOIN SOUND
                 PlaySound.join()
                 # LIGHT ON RING LED
                 activity_type = json_message["activity_type"]
                 if self.parent:
                     dock: Dock = self.parent.get_dock_by_activity(activity_type)
+                    print(f"dock: {dock}")
                     dock.launch_circle()
                 pass
             elif json_message["type"] == "leave":

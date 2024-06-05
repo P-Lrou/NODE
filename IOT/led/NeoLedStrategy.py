@@ -19,7 +19,7 @@ class CircleStrategy(Strategy):
         r, g, b = self.color
         for i in range(self.neo_led.num_pixels):
             brightness = brightness_levels[(i + self.step) % self.neo_led.num_pixels]
-            self.neo_led.pixels[i] = (int(r * brightness), int(g * brightness), int(b * brightness))
+            self.neo_led.pixels[i + self.neo_led.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
         self.neo_led.pixels.show()
         self.step = (self.step + 1) % self.neo_led.num_pixels
         time.sleep(self.wait)

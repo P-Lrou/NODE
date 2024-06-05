@@ -152,10 +152,11 @@ import neopixel
 from led.NeoLedStrategy import *
 
 class NeoLed:
-    def __init__(self, pin_number: int, num_pixels: int) -> None:
+    def __init__(self, pin_number: int, num_pixels: int = 1, starting_pixel: int = 0) -> None:
         self.good_pins_number: list[int] = [10, 12, 18, 21]
         self.pixel_pin = self._check_good_pin_number(pin_number)
         self.num_pixels = num_pixels
+        self.starting_pixel = starting_pixel
         self.ORDER = neopixel.GRB
         self.pixels = neopixel.NeoPixel(
             self.pixel_pin, self.num_pixels, brightness=0.2, auto_write=False, pixel_order=self.ORDER
@@ -163,7 +164,7 @@ class NeoLed:
         self.strategy = NoneStrategy(self)
 
     def _check_good_pin_number(self, pin_number: int):
-        if pin_number not in self.good_pins_number and False:
+        if pin_number not in self.good_pins_number:
             pin_number = self.good_pins_number[0]
         return getattr(board, f"D{pin_number}")
 
@@ -185,7 +186,8 @@ class NeoLed:
 
     def _set_all_pixels(self, color, brightness=1):
         r, g, b = color
-        self.pixels.fill((int(r * brightness), int(g * brightness), int(b * brightness)))
+        for i in range(self.num_pixels):
+            self.pixels[i + self.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
         self.pixels.show()
 
     def stop(self):

@@ -25,13 +25,14 @@ class IOTManager(WSDelegate):
         
         #* Dock
         from dock.DockController import DockController
-        rfid_dock_callback = RfidDockCallback(self.ws_client)
+        rfid_dock_callback = RfidDockCallback(ws_data_sender)
         self.dock_controller = DockController(rfid_dock_callback)
 
         #* Button to send requests
         from button.Button import Button
         button_send_ws_data = ButtonSendWSData(ws_data_sender)
         self.sending_button = Button(ButtonPins.instance().sending_button_number, button_send_ws_data)
+        
 
     def run_checks(self):
         LedDisplayer.setup()

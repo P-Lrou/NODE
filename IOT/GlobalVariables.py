@@ -35,7 +35,8 @@ class RfidPins(Singleton):
     
 class NeoLedPins(Singleton):
     def __init__(self):
-        self.pin_number: list[int] = [10, 12, 18]    
+        self.pin_number: int = 21
+        self.nums_pixels: list[int] = [24, 24, 24]
 
           
 class ButtonPins(Singleton):

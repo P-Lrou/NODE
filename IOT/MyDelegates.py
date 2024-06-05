@@ -13,9 +13,6 @@ class RfidDockCallback(RfidDelegate):
         self.timeout_request_seconds = 10
         self.dock = None
 
-    def set_dock(self, dock=None):
-        self.dock = dock
-
     def __send_data(self, data):
         if self.ws_data_sender:
             if data:
@@ -53,6 +50,7 @@ class RfidDockCallback(RfidDelegate):
     def define_activity(self, rfid) -> str:
         if rfid.last_text_read is not None:
             if len(rfid.last_text_read) != 0:
+                dock = rfid.parent
                 data: list[str] = rfid.last_text_read.split(":")
                 activity_type = ""
                 color_name = ""
@@ -63,12 +61,12 @@ class RfidDockCallback(RfidDelegate):
                     activity_type = data[0]
                 activities: list[str] = Activities.instance().activities
                 for activity in activities:
-                    if rfid.last_text_read == activity:
-                        if self.dock is not None:
-                            self.dock.activity = activity_type
-                            self.dock.color_name = color_name
+                    if activity_type == activity:
+                        if dock is not None:
+                            dock.activity = activity_type
+                            dock.color_name = color_name
                         return activity
-                DLog.LogError(f"Unkown activity. Text: {rfid.last_text_read}")
+                DLog.LogError(f"Unkown activity. Text: '{rfid.last_text_read}'")
             else:
                 DLog.LogError("Erreur pour retirer le badge")
                 #TODO: VOIR AVEC LES DESIGNER SI JE COUPE LE TIMER OU NON // ATTENTION IL Y A PLUS DE TIMER
