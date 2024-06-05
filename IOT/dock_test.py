@@ -5,11 +5,11 @@ import gc
 # Fonction pour initialiser les docks
 def init_docks():
     dock1 = Dock()
-    dock1.set_ring_led(pin_number=21, num_pixels=24, starting_pixel=0, total_pixels=48)
+    dock1.set_ring_led(pin_number=21, num_pixels=24, starting_pixel=0, total_pixels=72)
     dock2 = Dock()
-    dock2.set_ring_led(pin_number=21, num_pixels=24, starting_pixel=24, total_pixels=48)
+    dock2.set_ring_led(pin_number=21, num_pixels=24, starting_pixel=24, total_pixels=72)
     dock3 = Dock()
-    dock3.set_ring_led(pin_number=18, num_pixels=24, starting_pixel=0, total_pixels=24)
+    dock3.set_ring_led(pin_number=21, num_pixels=24, starting_pixel=48, total_pixels=72)
     return dock1, dock2, dock3
 
 # Fonction pour libérer les ressources des docks

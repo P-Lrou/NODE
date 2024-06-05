@@ -30,8 +30,9 @@ class NeoLedPins:
     _instance = None
 
     def __init__(self):
-<<<<<<< Updated upstream
-        self.pin_number: list[int] = [10, 12, 18]
+        self.pin_number: int = 21
+        self.nums_pixels: list[int] = [24, 24, 24]
+        self.total_pixels: int = 72
 
     @classmethod
     def instance(cls) -> "NeoLedPins":
@@ -42,14 +43,6 @@ class NeoLedPins:
 class RfidPins:
     _instance = None
 
-=======
-        self.pin_number: int = 21
-        self.nums_pixels: list[int] = [24, 24, 24]
-        self.total_pixels: int = 72
-        
-          
-class ButtonPins(Singleton):
->>>>>>> Stashed changes
     def __init__(self) -> None:
         self.rfid_number = [2, 3, 4]
 
@@ -58,7 +51,6 @@ class ButtonPins(Singleton):
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
-
 
 class Activities:
     _instance = None

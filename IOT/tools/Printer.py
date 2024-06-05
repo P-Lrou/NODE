@@ -1,4 +1,6 @@
 import subprocess
+import time
+import RPi.GPIO as GPIO
 
 class Printer:
     @staticmethod
@@ -9,9 +11,6 @@ class Printer:
             '-c', '1',
             '-i', image_path
         ]
-<<<<<<< Updated upstream
-        subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-=======
         subprocess.run(command, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     @staticmethod
@@ -25,4 +24,3 @@ if __name__ == "__main__":
     GPIO.setup(14, GPIO.OUT)
     Printer.switch_state()
     GPIO.cleanup()
->>>>>>> Stashed changes
