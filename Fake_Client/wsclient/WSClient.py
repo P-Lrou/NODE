@@ -3,7 +3,6 @@ from threading import Thread, Event
 import json
 import time
 
-
 class WSClient(Thread):
     def __init__(self, uri, delegate=None):
         super().__init__()
@@ -34,12 +33,22 @@ class WSClient(Thread):
 
     def on_open(self, ws):
         self.connected = True
+        data = {}
+        if self.uid is not None:
+            data = {
+                "uid": self.uid
+            }
+        else:
+            data = {
+                "uid": None
+            }
+        self.send_message(json.dumps(data))
         if self.delegate:
             self.delegate.on_open()
 
     def on_message(self, ws, message):
         json_message = json.loads(message)
-        if "uid" in json_message:
+        if "uid" in json_message and self.uid is None:
             self.uid = json_message["uid"]
         if self.delegate:
             self.delegate.on_message(json_message)
