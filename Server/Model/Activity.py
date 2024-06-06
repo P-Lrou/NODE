@@ -4,7 +4,7 @@ from typing import List, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from Model.Request import Request
-    from Model.Member import Member
+    from Model.Client import Client
     from Model.Room import Room
 
 class Activity(BaseModel):
@@ -32,15 +32,15 @@ class Activity(BaseModel):
         from Model.Request import Request
         return [request for request in self.requests if request.state == Request.ATTEMPTING]
     
-    def get_attempting_members(self) -> List["Member"]:
+    def get_attempting_clients(self) -> List["Client"]:
         attempting_requests = self.get_attempting_requests()
-        return [request.member for request in attempting_requests]
+        return [request.client for request in attempting_requests]
     
     def has_min_participants(self) -> bool:
-        return len(self.get_attempting_members()) >= self.min_participants
+        return len(self.get_attempting_clients()) >= self.min_participants
     
     def has_max_participants(self) -> bool:
-        return len(self.get_attempting_members()) == self.max_participants
+        return len(self.get_attempting_clients()) == self.max_participants
     
     def get_rooms(self) -> List["Room"]:
         return list(self.rooms)

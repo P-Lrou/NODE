@@ -5,21 +5,22 @@ import datetime
 
 if TYPE_CHECKING:
     from Model.Activity import Activity
-    from Model.Member import Member
+    from Model.Client import Client
 
 class Request(BaseModel):
     from Model.Activity import Activity
-    from Model.Member import Member
+    from Model.Client import Client
     backref = "requests"
     id = IntegerField(primary_key=True)
     state = CharField()
     activity: Activity = ForeignKeyField(Activity, backref=backref)
-    member: Member = ForeignKeyField(Member, backref=backref)
+    client: Client = ForeignKeyField(Client, backref=backref)
     created_at = DateTimeField()
 
     ACCEPTED = "accepted"
     REFUSED = "refused"
     ATTEMPTING = "attempting"
+    DISCONNECTED = "disconnected"
 
     state_possibilities = [
         ACCEPTED,
@@ -40,12 +41,12 @@ class Request(BaseModel):
         return state
 
     @classmethod
-    def insert(cls, state: str, activity: "Activity", member: "Member", **insert) -> "Request":
+    def insert(cls, state: str, activity: "Activity", client: "Client", **insert) -> "Request":
         state = cls.__check_state_value(state)
         data = {
             "state": state,
             "activity": activity,
-            "member": member,
+            "client": client,
             "created_at": datetime.datetime.now()
         }
         query: ModelInsert = super(Request, cls).insert(data, **insert)
