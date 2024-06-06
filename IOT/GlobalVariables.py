@@ -53,3 +53,14 @@ class Activities(Singleton):
             "petanque",
             "promenade"
         ]
+
+
+class Path(Singleton):
+    def __init__(self) -> None:
+        self.init_sound = "ressources/sound/"
+        self.rfid_sounds = [
+            "Marimba1.wav",
+            "Marimba2.wav",
+            "Marimba3.wav",
+        ]
+        self.found_sound = "Match_found.wav"

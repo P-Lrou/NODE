@@ -12,8 +12,6 @@ class MessageHandler:
             if json_message["type"] == "new_request":
                 pass
             elif json_message["type"] == "join":
-                # TODO: PLAY JOIN SOUND
-                # PlaySound.join()
                 # LIGHT ON RING LED
                 activity_type = json_message["activity_type"]
                 if self.parent:
@@ -22,8 +20,6 @@ class MessageHandler:
                 pass
             elif json_message["type"] == "leave":
                 activity_type = json_message["activity_type"]
-                # TODO: PLAY LEAVE SOUND
-                # PlaySound.leave()
                 # LIGHT OFF RING LEDS
                 activity_type = json_message["activity_type"]
                 if self.parent:
@@ -32,8 +28,8 @@ class MessageHandler:
                 pass
             elif json_message["type"] == "found":
                 activity_type = json_message["activity_type"]
-                # TODO: PLAY PRINTING SOUND
-                # PlaySound.print()
+                # PLAY PRINTING SOUND
+                PlaySound.print()
                 # LIGHT ON RING LED
                 activity_type = json_message["activity_type"]
                 if self.parent:
@@ -51,7 +47,6 @@ class MessageHandler:
                 Printer.switch_state()
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":
-                #TODO: PLAY NOT_FOUND SOUND
                 # BLINKING ERROR ACTIVITY LED
                 activity_type = json_message["activity_type"]
                 if self.parent:

@@ -8,6 +8,11 @@ class Dock:
         self.rfid = None
         self.rfid_dock_callback = rfid_dock_callback
         self.ring_led = None
+        self.sounds = {
+            "rfid": {
+                "placed": None
+            }
+        }
         self.activity = ""
         self.color_name = ""
 
@@ -16,6 +21,10 @@ class Dock:
 
     def set_ring_led(self, pin_number: int, num_pixels: int, starting_pixel: int = 0, total_pixels: int = 72) -> None:
         self.ring_led = NeoLed(pin_number, num_pixels, starting_pixel, total_pixels)
+
+    def set_sound(self, rfid_sound: list[str]):
+        for key_sound, sound in zip(self.sounds["rfid"].keys(), rfid_sound):
+            self.sounds["rfid"][key_sound] = sound
 
     def process(self) -> None:
         if self.rfid is not None:
