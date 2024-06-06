@@ -7,9 +7,10 @@ from wsclient.WebSocketDataSender import WebSocketDataSender
 from rfid.RfidDelegate import RfidDelegate
 
 class RfidDockCallback(RfidDelegate):
-    def __init__(self, ws_data_sender: WebSocketDataSender = None) -> None:
+    def __init__(self, parent = None, ws_data_sender: WebSocketDataSender = None) -> None:
         super().__init__()
         self.ws_data_sender = ws_data_sender
+        self.parent = parent
         self.timeout_request_seconds = 10
         self.dock = None
 
@@ -86,7 +87,10 @@ class RfidDockCallback(RfidDelegate):
             if dock is not None:
                 dock.activity = activity
                 dock.color_name = color
-                dock.launch_circle()
+                dock.launch_fill()
+                docks = self.parent.get_empty_docks()
+                for non_dock in docks:
+                    non_dock.launch_wait()
             self.__remove_data(self.__get_cancel_data(activity))
             self.__add_data(self.__get_request_data(activity))
 
@@ -99,7 +103,12 @@ class RfidDockCallback(RfidDelegate):
             dock = rfid.parent
             dock.activity = ""
             dock.color_name = ""
-            dock = rfid.parent.launch_stop()
+            if not self.parent.has_active_docks():
+                docks = self.parent.get_docks()
+                for non_dock in docks:
+                    non_dock.launch_stop()
+            else:
+                dock = rfid.parent.launch_wait()
             if not self.__remove_data(self.__get_request_data(activity)):
                 self.__add_data(self.__get_cancel_data(activity))
                 self.__send_data(True)

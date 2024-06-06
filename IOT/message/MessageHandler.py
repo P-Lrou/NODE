@@ -18,7 +18,7 @@ class MessageHandler:
                 activity_type = json_message["activity_type"]
                 if self.parent:
                     dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_fill()
+                    dock.launch_circle()
                 pass
             elif json_message["type"] == "leave":
                 activity_type = json_message["activity_type"]
@@ -45,6 +45,8 @@ class MessageHandler:
                 #TODO: GENERATE IMAGE
                 image_path = "ressources/images/ticket_imprimante.png"
                 # PRINT IMAGE
+                Printer.switch_state()
+                time.sleep(3)
                 Printer.print(image_path)
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":

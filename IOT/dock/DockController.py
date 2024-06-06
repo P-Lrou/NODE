@@ -1,7 +1,7 @@
 from GlobalVariables import *
 from dock.Dock import Dock
 
-class DockController:
+class DockController:            
     def __init__(self, rfid_dock_callback=None) -> None:
         self.docks: list[Dock] = []
         rfid_pins = RfidPins.instance().rfid_number
@@ -19,11 +19,16 @@ class DockController:
         for dock in self.docks:
             dock.process()
 
-    def get_dock_by_activity(self, activity_type: str) -> Dock:
+    def stop_all(self):
+        for dock in self.docks:
+            dock.launch_stop()
+
+    def get_docks_by_activity(self, activity_type: str) -> Dock:
+        valid_docks: list[Dock] = []
         for dock in self.docks:
             if dock.has_activity(activity_type):
-                return dock
-        return None
+                valid_docks.append(dock)
+        return valid_docks
     
     def get_docks_by_non_activity(self, activity_type: str) -> list:
         valid_docks: list[Dock] = []
@@ -31,3 +36,7 @@ class DockController:
             if not dock.has_activity(activity_type):
                 valid_docks.append(dock)
         return valid_docks
+    
+    def has_active_dock(self) -> bool:
+        activity_values = [dock.activity for dock in self.docks]
+        return activity_values.count("") != len(self.docks)

@@ -8,8 +8,8 @@ class Dock:
         self.rfid = None
         self.rfid_dock_callback = rfid_dock_callback
         self.ring_led = None
-        self.activity = None
-        self.color_name = None
+        self.activity = ""
+        self.color_name = ""
 
     def set_rfid(self, pin_number: int) -> None:
         self.rfid = Rfid(pin_number, self.rfid_dock_callback, parent=self)
@@ -44,19 +44,28 @@ class Dock:
 
     def launch_fill(self):
         if self.ring_led is not None:
-            self.ring_led.fill(Color.get_color_by_text(self.activity))
+            self.ring_led.fill(Color.get_color_by_text(self.activity), brightness=0.5)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_error(self):
         if self.ring_led is not None:
-            self.ring_led.pulse((255, 0, 0))
+            self.ring_led.fill((255, 0, 0), 0.5)
+            # self.ring_led.pulse((255, 0, 0), wait=0)
         else:
             DLog.LogError("Error: self.ring_led is None")
     
     def launch_success(self):
         if self.ring_led is not None:
-            self.ring_led.pulse((0, 255, 0))
+            self.ring_led.fill((0, 255, 0), 0.5)
+            # self.ring_led.pulse((0, 255, 0), wait=0)
+        else:
+            DLog.LogError("Error: self.ring_led is None")
+
+    def launch_wait(self):
+        if self.ring_led is not None:
+            self.ring_led.fill((255, 255, 255), 0.5)
+            # self.ring_led.pulse((0, 255, 0), wait=0)
         else:
             DLog.LogError("Error: self.ring_led is None")
 

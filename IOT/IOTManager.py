@@ -9,7 +9,8 @@ import sys
 import time
 
 class IOTManager(WSDelegate):
-    def __del__(self):
+    def close(self):
+        self.dock_controller.stop_all()
         GPIO.cleanup()
 
     def __init__(self) -> None:
@@ -25,7 +26,7 @@ class IOTManager(WSDelegate):
         
         #* Dock
         from dock.DockController import DockController
-        rfid_dock_callback = RfidDockCallback(ws_data_sender)
+        rfid_dock_callback = RfidDockCallback(self, ws_data_sender)
         self.dock_controller = DockController(rfid_dock_callback)
 
         #* Button to send requests
@@ -71,10 +72,16 @@ class IOTManager(WSDelegate):
         self.message_handler.process_message(json_message)
 
     def get_dock_by_activity(self, activity_type: str):
-        return self.dock_controller.get_dock_by_activity(activity_type)
+        return self.dock_controller.get_docks_by_activity(activity_type)[0]
     
     def get_docks_by_non_activity(self, activity_type: str):
         return self.dock_controller.get_docks_by_non_activity(activity_type)
+    
+    def get_empty_docks(self):
+        return self.dock_controller.get_docks_by_activity("")
 
     def get_docks(self):
         return self.dock_controller.docks
+    
+    def has_active_docks(self):
+        return self.dock_controller.has_active_dock()

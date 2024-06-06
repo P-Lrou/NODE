@@ -33,8 +33,16 @@ class WSClient(Thread):
 
     def on_open(self, ws):
         self.connected = True
+        data = {}
         if self.uid is not None:
-            self.send_message(f"uid:{self.uid}")
+            data = {
+                "uid": self.uid
+            }
+        else:
+            data = {
+                "uid": None
+            }
+        self.send_message(json.dumps(data))
         if self.delegate:
             self.delegate.on_open()
 
