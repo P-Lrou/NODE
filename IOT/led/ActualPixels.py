@@ -10,6 +10,7 @@ class ActualPixels:
         self.pixels = neopixel.NeoPixel(
             self.pixel_pin, total_pixels, brightness=0.2, auto_write=False, pixel_order=self.ORDER
         )
+        self.pixels.fill((0, 0, 0))
 
     def _check_good_pin_number(self, pin_number: int):
         if pin_number not in self.good_pins_number:

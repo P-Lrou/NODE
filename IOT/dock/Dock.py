@@ -20,10 +20,6 @@ class Dock:
     def process(self) -> None:
         if self.rfid is not None:
             self.rfid.process()
-            if self.ring_led is not None:
-                self.ring_led.execute()
-            else:
-                DLog.LogError("Error to execute ring_led! self.ring_led is None")
         else:
             DLog.LogError("Error to process rfid! self.rfid is None")
 
@@ -32,40 +28,37 @@ class Dock:
         
     def launch_circle(self):
         if self.ring_led is not None:
-            self.ring_led.circle(Color.get_color_by_text(self.activity), wait=0)
+            self.ring_led.circle(Color.get_color_by_text(self.activity), wait=0.1)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_pulse(self):
         if self.ring_led is not None:
-            self.ring_led.pulse(Color.get_color_by_text(self.activity), wait=0)
+            self.ring_led.pulse(Color.get_color_by_text(self.activity), wait=0.01)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_fill(self):
         if self.ring_led is not None:
-            self.ring_led.fill(Color.get_color_by_text(self.activity), brightness=0.5)
+            self.ring_led.fill(Color.get_color_by_text(self.activity), brightness=1)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_error(self):
         if self.ring_led is not None:
-            self.ring_led.fill((255, 0, 0), 0.5)
-            # self.ring_led.pulse((255, 0, 0), wait=0)
+            self.ring_led.pulse((255, 0, 0), wait=0.01)
         else:
             DLog.LogError("Error: self.ring_led is None")
     
     def launch_success(self):
         if self.ring_led is not None:
-            self.ring_led.fill((0, 255, 0), 0.5)
-            # self.ring_led.pulse((0, 255, 0), wait=0)
+            self.ring_led.pulse(Color.get_color_by_text(self.activity), wait=0.001)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_wait(self):
         if self.ring_led is not None:
-            self.ring_led.fill((255, 255, 255), 0.5)
-            # self.ring_led.pulse((0, 255, 0), wait=0)
+            self.ring_led.pulse((255, 255, 255), wait=0.03)
         else:
             DLog.LogError("Error: self.ring_led is None")
 

@@ -12,7 +12,7 @@ class DockController:
             for key, rfid_pin, num_pixels in zip(range(len(nums_pixels)), rfid_pins, nums_pixels):
                 dock = Dock(rfid_dock_callback)
                 dock.set_rfid(rfid_pin)
-                # dock.set_ring_led(NeoLedPins.instance().pin_number, num_pixels, starting_pixel=key * num_pixels, total_pixels=NeoLedPins.instance().total_pixels)
+                dock.set_ring_led(NeoLedPins.instance().pin_number, num_pixels, starting_pixel=key * num_pixels, total_pixels=NeoLedPins.instance().total_pixels)
                 self.docks.append(dock)
 
     def process(self) -> None:
