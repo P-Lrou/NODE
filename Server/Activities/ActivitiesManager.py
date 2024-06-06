@@ -22,7 +22,6 @@ class ActivitiesManager:
         ]
         self.tables_to_reset: list[BaseModel] = [
             Request,
-            Client,
             Room,
             Participant
         ]
@@ -137,6 +136,7 @@ class ActivitiesManager:
                     client: Client = Client.get_first_client_by_uid(data["client_uid"])
                     if client:
                         request = client.get_attempting_request_by_activity(activity)
+                        print(request)
                         if request:
                             request.update_state(Request.REFUSED)
                             leave_message = json_encode({"type": "leave", "activity_type": activity_type})
@@ -172,8 +172,19 @@ class ActivitiesManager:
         if client:
             requests = client.get_attempting_requests()
             for request in requests:
-                request.update_state(Request.REFUSED)
-            DLog.LogWhisper("Disconnection of a client, REFUSED all of his requests")
+                request.update_state(Request.DISCONNECTED)
+            DLog.LogWhisper("Disconnection of a client, DISCONNECTED all of his attempting requests")
+        else:
+            DLog.LogError(f"No client found. uid: {client['uid']}")
+    
+    @staticmethod
+    def request_by_reconnection(client):
+        client: Client = Client.get_first_client_by_uid(client["uid"])
+        if client:
+            requests = client.get_disconnected_requests()
+            for request in requests:
+                request.update_state(Request.ATTEMPTING)
+            DLog.LogWhisper("Reconnection of a client, ATTEMPTING all of his disconnected requests")
         else:
             DLog.LogError(f"No client found. uid: {client['uid']}")
 

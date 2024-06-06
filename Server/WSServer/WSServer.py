@@ -16,14 +16,7 @@ class WSServer(Testable):
         self.test_timeout_seconds = 3
 
     def handle_new_connection(self, client, server):
-        uid = str(uuid.uuid4())
-        while any(user['uid'] == uid for user in self.current_users):
-            uid = str(uuid.uuid4())
-        self.current_users.append({"client": client['id'], "uid": uid})
-        client['uid'] = uid
-        welcome_message = json_encode({"uid": uid})
-        DLog.LogWhisper(f"New Client : {uid}")
-        server.send_message(client, welcome_message)
+        DLog.LogWhisper(f"New Client!")
         if self.delegate:
             self.delegate.new_connection(client, server)
 
@@ -39,6 +32,23 @@ class WSServer(Testable):
 
     def handle_message(self, client, server, message: str):
         DLog.Log(f"Received message from {client['id']}: {message}")
+        if "uid" in message:
+            data_message = json_decode(message)
+            if data_message:
+                if data_message["uid"] == None:
+                    uid = str(uuid.uuid4())
+                    self.current_users.append({"client": client['id'], "uid": uid})
+                    client['uid'] = uid
+                    welcome_message = json_encode({"uid": uid})
+                    DLog.LogWhisper(f"New Client : {uid}")
+                    server.send_message(client, welcome_message)
+                    if self.delegate:
+                        self.delegate.new_client(uid)
+                else:
+                    uid = data_message["uid"]
+                    client["uid"] = uid
+                    if self.delegate:
+                        self.delegate.client_reconnected(uid)
         if self.delegate:
             self.delegate.received_message(client, server, message)
 

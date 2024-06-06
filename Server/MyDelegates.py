@@ -6,6 +6,7 @@ from WSServer.WSServerDelegate import WSServerDelegate
 from WSServer.ClientHandler import ClientHandler
 # CLIENT MODEL
 from Model.Client import Client
+from Model.Request import Request
 
 class WSServerCallback(WSServerDelegate):
     def __init__(self) -> None:
@@ -14,14 +15,22 @@ class WSServerCallback(WSServerDelegate):
 
     def new_connection(self, client, server) -> None:
         super().new_connection(client, server)
-        name = client["uid"]
-        if "name" in client:
-            name = client["name"]
-        new_client = Client.insert(name, client["uid"])
+
+    def new_client(self, uid) -> None:
+        new_client = Client.insert(uid)
         if new_client:
             DLog.LogSuccess("Insert client")
         else:
-            DLog.LogError(f"Fail to insert client with uid: {client['uid']}")
+            DLog.LogError(f"Fail to insert client with uid: {uid}")
+
+    def client_reconnected(self, uid) -> None:
+        client: Client = Client.get_first_client_by_uid(uid)
+        if client:
+            requests = client.get_disconnected_requests()
+            for request in requests:
+                request.update_state(Request.ATTEMPTING)
+        else:
+            DLog.LogError(f"No client found with uid: {uid}")
 
     def received_message(self, client, server, message: str) -> None:
         super().received_message(client, server, message)

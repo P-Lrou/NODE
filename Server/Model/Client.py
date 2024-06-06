@@ -44,6 +44,10 @@ class Client(BaseModel):
         from Model.Request import Request
         return [request for request in self.requests if request.state == Request.ATTEMPTING]
     
+    def get_disconnected_requests(self) -> List["Request"]:
+        from Model.Request import Request
+        return [request for request in self.requests if request.state == Request.DISCONNECTED]
+    
     def get_attempting_request_by_activity(self, activity: "Activity") -> Optional["Request"]:
         from Model.Request import Request
         requests = [request for request in self.requests if request.state == Request.ATTEMPTING and request.activity == activity]

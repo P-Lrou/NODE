@@ -20,6 +20,7 @@ class Request(BaseModel):
     ACCEPTED = "accepted"
     REFUSED = "refused"
     ATTEMPTING = "attempting"
+    DISCONNECTED = "disconnected"
 
     state_possibilities = [
         ACCEPTED,
