@@ -8,17 +8,15 @@ class NeoLed:
         self.starting_pixel = starting_pixel
         self.running = False
         self.current_thread = None
-        self.condition = threading.Condition()
         ActualPixels.instance(pin_number, total_pixels)
 
     def _start_thread(self, target, args=()):
-        with self.condition:
-            if self.running:
-                self.stop()
-                time.sleep(0.1)  # Small delay to ensure that the previous thread is stopped
-            self.running = True
-            self.current_thread = threading.Thread(target=target, args=args)
-            self.current_thread.start()
+        if self.running:
+            self.stop()
+            time.sleep(0.1)  # Small delay to ensure that the previous thread is stopped
+        self.running = True
+        self.current_thread = threading.Thread(target=target, args=args)
+        self.current_thread.start()
 
     def circle(self, color, wait=0.1):
         self._start_thread(self._run_circle, (color, wait))
@@ -27,14 +25,11 @@ class NeoLed:
         brightness_levels = [i / self.num_pixels for i in range(self.num_pixels)]
         while self.running:
             for j in range(self.num_pixels):
-                with self.condition:
-                    if not self.running:
-                        return
-                    r, g, b = color
-                    for i in range(self.num_pixels):
-                        brightness = brightness_levels[(i + j) % self.num_pixels]
-                        ActualPixels.instance().pixels[i + self.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
-                    ActualPixels.instance().pixels.show()
+                r, g, b = color
+                for i in range(self.num_pixels):
+                    brightness = brightness_levels[(i + j) % self.num_pixels]
+                    ActualPixels.instance().pixels[i + self.starting_pixel] = (int(r * brightness), int(g * brightness), int(b * brightness))
+                ActualPixels.instance().pixels.show()
                 time.sleep(wait)
             time.sleep(wait)
 
@@ -45,16 +40,10 @@ class NeoLed:
         r, g, b = color
         while self.running:
             for brightness in range(0, 256, 5):  # increasing brightness
-                with self.condition:
-                    if not self.running:
-                        return
-                    self._set_all_pixels((r * brightness // 255, g * brightness // 255, b * brightness // 255))
+                self._set_all_pixels((r * brightness // 255, g * brightness // 255, b * brightness // 255))
                 time.sleep(wait)
             for brightness in range(255, -1, -5):  # decreasing brightness
-                with self.condition:
-                    if not self.running:
-                        return
-                    self._set_all_pixels((r * brightness // 255, g * brightness // 255, b * brightness // 255))
+                self._set_all_pixels((r * brightness // 255, g * brightness // 255, b * brightness // 255))
                 time.sleep(wait)
         
     def fill(self, color, brightness=1):
@@ -68,8 +57,8 @@ class NeoLed:
         ActualPixels.instance().pixels.show()
 
     def stop(self):
-        with self.condition:
-            self.running = False
+        self.running = False
         if self.current_thread is not None:
             self.current_thread.join()  # Wait for the current thread to end
         self._set_all_pixels((0, 0, 0))
+
