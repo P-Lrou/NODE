@@ -32,9 +32,9 @@ class WSServer(Testable):
 
     def handle_message(self, client, server, message: str):
         DLog.Log(f"Received message from {client['id']}: {message}")
-        if "uid" in message:
-            data_message = json_decode(message)
-            if data_message:
+        data_message = json_decode(message)
+        if data_message:
+            if "uid" in data_message:
                 if data_message["uid"] == None:
                     uid = str(uuid.uuid4())
                     self.current_users.append({"client": client['id'], "uid": uid})
