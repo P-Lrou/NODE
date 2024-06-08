@@ -1,5 +1,6 @@
 from tools.DLog import DLog
 from tools.Timer import Timer
+import uuid
 from Activities.ActivitiesManager import ActivitiesManager
 
 class ClientHandler:
