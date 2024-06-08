@@ -1,6 +1,6 @@
 from GlobalVariables import *
 from tools.Sound import PlaySound
-from tools.Printer import Printer
+from printer.Printer import ThermalPrinter
 from dock.Dock import Dock
 
 class MessageHandler:
@@ -45,10 +45,10 @@ class MessageHandler:
                 #TODO: GENERATE IMAGE
                 image_path = "ressources/images/ticket_imprimante.png"
                 # PRINT IMAGE
-                Printer.switch_state()
+                ThermalPrinter.switch_state()
                 time.sleep(3)
-                Printer.print(image_path)
-                Printer.switch_state()
+                ThermalPrinter.print(image_path)
+                ThermalPrinter.switch_state()
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":
                 #TODO: PLAY NOT_FOUND SOUND
