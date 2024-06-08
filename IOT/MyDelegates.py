@@ -91,6 +91,8 @@ class RfidDockCallback(RfidDelegate):
                 docks = self.parent.get_empty_docks()
                 for non_dock in docks:
                     non_dock.launch_wait()
+                # PlaySound.join()
+                # PlaySound.play_sound(dock.sounds["rfid"]["placed"])
             self.__remove_data(self.__get_cancel_data(activity))
             self.__add_data(self.__get_request_data(activity))
 
