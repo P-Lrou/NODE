@@ -17,7 +17,8 @@ from dock.rfid.Badge import *
 from dock.neoled.NeoLed import NeoLed
 
 class Dock(RfidDelegate):
-    def __init__(self, delegate: DockDelegate) -> None:
+    def __init__(self, id: int, delegate: DockDelegate) -> None:
+        self.id = id
         self.delegate = delegate
         self.state: DockState = OffState(self)
         self.rfid: Rfid = None
@@ -45,6 +46,8 @@ class Dock(RfidDelegate):
         for key_sound, rfid_sound in zip(self.sounds["rfid"].keys(), rfid_sounds):
             self.sounds["rfid"][key_sound] = rfid_sound
 
+    #* RFID PART
+
     def process(self) -> None:
         if self.rfid is not None:
             self.rfid.process()
@@ -54,13 +57,17 @@ class Dock(RfidDelegate):
     def rfid_placed(self, badge: Badge, rfid: Rfid):
         self.activity_badge = ActivityBadge(badge.id, badge.text)
         self._has_activity = True
+        DLog.Log(f"{self.activity_badge.get_activity()} placed")
         PlaySound.play(self.sounds["rfid"]["placed"])
         self.delegate.activity_added(self)
 
     def rfid_removed(self, rfid: Rfid):
         self._has_activity = False
+        DLog.Log(f"{self.activity_badge.get_activity()} removed")
         PlaySound.play(self.sounds["rfid"]["removed"])
         self.delegate.activity_removed(self)
+
+    #* STATE PART
 
     def off(self):
         self.state.off()
@@ -80,8 +87,7 @@ class Dock(RfidDelegate):
     def not_found(self):
         self.state.not_found()
 
-    def idle(self):
-        self.state.idle()
+    #* REQUEST PART
 
     def has_activity(self) -> bool:
         return self._has_activity
@@ -96,25 +102,24 @@ class Dock(RfidDelegate):
     
     def is_cancelable(self):
         return isinstance(self.state, SearchingState)
-    
-    #************ A VOIR
-
         
+    #* NEOLED PART
+
     def launch_circle(self):
         if self.ring_led is not None:
-            self.ring_led.circle(Color.get_color_by_text(self.activity), wait=0.1)
+            self.ring_led.circle(Color.get_color_by_text(self.activity_badge.get_activity()), wait=0.1)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_pulse(self):
         if self.ring_led is not None:
-            self.ring_led.pulse(Color.get_color_by_text(self.activity), wait=0.01)
+            self.ring_led.pulse(Color.get_color_by_text(self.activity_badge.get_activity()), wait=0.01)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
     def launch_fill(self):
         if self.ring_led is not None:
-            self.ring_led.fill(Color.get_color_by_text(self.activity), brightness=1)
+            self.ring_led.fill(Color.get_color_by_text(self.activity_badge.get_activity()), brightness=1)
         else:
             DLog.LogError("Error: self.ring_led is None")
 
@@ -126,7 +131,7 @@ class Dock(RfidDelegate):
     
     def launch_success(self):
         if self.ring_led is not None:
-            self.ring_led.pulse(Color.get_color_by_text(self.activity), wait=0.001)
+            self.ring_led.pulse(Color.get_color_by_text(self.activity_badge.get_activity()), wait=0.001)
         else:
             DLog.LogError("Error: self.ring_led is None")
 

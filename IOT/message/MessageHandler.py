@@ -27,11 +27,10 @@ class MessageHandler:
                 self.iot_manager.dock_manager.activity_leave(activity_type)
             elif json_message["type"] == "found":
                 activity_type = json_message["activity_type"]
-                # PLAY PRINTING SOUND
-                PlaySound.print()
-                activity_type = json_message["activity_type"]
                 # LIGHT ON FOUND RING LED
                 self.iot_manager.dock_manager.activity_found(activity_type)
+                # PLAY PRINTING SOUND
+                PlaySound.print()
                 #TODO: GENERATE IMAGE
                 image_path = "ressources/images/ticket_imprimante.png"
                 # PRINT IMAGE

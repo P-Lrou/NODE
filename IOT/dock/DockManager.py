@@ -8,7 +8,7 @@ class DockManager(DockDelegate):
     def __init__(self, ws_manager: WSManager) -> None:
         self.ws_manager = ws_manager
         self.docks: list[Dock] = []
-        self.has_new_request = False
+        self.dock_changed = []
         rfid_pins = RfidPins.instance().rfid_number
         nums_pixels = NeoLedPins.instance().nums_pixels
         sounds = Path.instance().rfid_sounds
@@ -17,24 +17,26 @@ class DockManager(DockDelegate):
             DLog.LogError("No matching number between rfid_pins and nums_pixels")
         else:
             for key, rfid_pin, num_pixels, sound in zip(range(len(nums_pixels)), rfid_pins, nums_pixels, sounds):
-                dock = Dock(delegate=self)
+                self.dock_changed.append(False)
+                dock = Dock(key, delegate=self)
                 dock.set_rfid(rfid_pin)
                 dock.set_ring_led(NeoLedPins.instance().pin_number, num_pixels, starting_pixel=key * num_pixels, total_pixels=NeoLedPins.instance().total_pixels)
                 dock.set_sounds([sound])
                 self.docks.append(dock)
 
     def activity_added(self, dock: Dock) -> None:
-        self.has_new_request = True
+        self.dock_changed[dock.id] = True
         dock.on()
         for other_dock in self.docks:
-            if other_dock != dock:
+            if other_dock != dock and not other_dock.has_activity():
                 other_dock.waiting()
 
     def activity_removed(self, dock: Dock) -> None:
-        for a_dock in self.docks:
-            if self.has_active_dock():
-                a_dock.waiting()
-            else:
+        self.dock_changed[dock.id] = False
+        if self.has_active_dock():
+            dock.waiting()
+        else:
+            for a_dock in self.docks:
                 a_dock.off()
 
     def has_active_dock(self) -> bool:
@@ -51,6 +53,12 @@ class DockManager(DockDelegate):
         for dock in self.docks:
             dock.off()
 
+    def has_new_requests(self):
+        return True in self.dock_changed
+    
+    def reset_dock_changed(self):
+        self.dock_changed = [False for _ in self.dock_changed]
+
     def requested_activities(self) -> list[str]:
         activities: list[str] = []
         for dock in self.docks:
@@ -66,12 +74,14 @@ class DockManager(DockDelegate):
         return activities
     
     def handle_activities(self) -> None:
-        if self.has_new_request:
+        if self.has_new_requests():
             activities_type = self.requested_activities()
             self.ws_manager.send_activities_request(activities_type)
         else:
             activities_type = self.canceled_activities()
             self.ws_manager.send_activities_cancel(activities_type)
+        self.reset_dock_changed()
+        
     
     def activity_join(self, activity_type: str) -> None:
         for dock in self.docks:
