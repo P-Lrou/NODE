@@ -20,6 +20,14 @@ class WSClient(Thread):
     def run(self):
         self.ws.run_forever()
 
+    def send_ackowledgment(self, message_id):
+        if self.connected:
+            message = {
+                "type": "ackowledgment",
+                "message_id": message_id
+            }
+        self.send_message(json.dumps(message))
+
     def send_message(self, text):
         if self.connected:
             message = {
@@ -48,12 +56,16 @@ class WSClient(Thread):
 
     def on_message(self, ws, message):
         json_message = json.loads(message)
+        if "message_id" in json_message:
+            # self.send_ackowledgment(json_message["message_id"])
+            pass
         if "uid" in json_message and self.uid is None:
             self.uid = json_message["uid"]
         if self.delegate:
             self.delegate.on_message(json_message)
 
     def on_error(self, ws, error):
+        print(error)
         if self.delegate:
             self.delegate.on_error(ws, error)
 
