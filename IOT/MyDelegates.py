@@ -1,6 +1,7 @@
 from GlobalVariables import *
 from tools.DLog import DLog
 from tools.JSONTools import *
+from tools.Sound import PlaySound
 from wsclient.WebSocketDataSender import WebSocketDataSender
 
 #* Rfid reader

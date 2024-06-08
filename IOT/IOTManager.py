@@ -65,6 +65,7 @@ class IOTManager(WSDelegate):
                     self.dock_controller.process()
                     self.sending_button.process()
         except KeyboardInterrupt:
+            self.dock_controller.stop_all()
             DLog.Log("End of the program")
 
     def on_message(self, json_message):

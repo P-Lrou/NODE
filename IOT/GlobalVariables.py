@@ -53,7 +53,7 @@ class Activities(Singleton):
             "petanque",
             "promenade"
         ]
-
+        
 class Path(Singleton):
     def __init__(self) -> None:
         self.init_sound = "ressources/sound/"

@@ -4,7 +4,7 @@ class Color:
     SCRABBLE = (251, 187, 14)
     GOUTER = (232, 44, 136)
     PETANQUE = (149, 27, 129)
-    PROMENADE = (87, 42, 0)
+    PROMENADE = (87, 176, 49)
 
     @classmethod
     def get_color_by_text(cls, text):

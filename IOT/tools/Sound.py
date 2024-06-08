@@ -33,7 +33,7 @@ class PlaySound:
         volume = 100
         print_path = cls.init_path + Path.instance().found_sound
         cls.__play_sound(print_path, volume)
-
+        
     @classmethod
     def error(cls):
         volume = 100
