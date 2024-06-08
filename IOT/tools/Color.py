@@ -6,6 +6,10 @@ class Color:
     PETANQUE = (149, 27, 129)
     PROMENADE = (87, 42, 0)
 
+    WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    RED = (255, 0, 0)
+
     @classmethod
     def get_color_by_text(cls, text):
         text_upper = text.upper()
