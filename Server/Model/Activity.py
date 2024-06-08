@@ -20,10 +20,12 @@ class Activity(BaseModel):
     @classmethod
     def get_activity_by_name(cls, name: str) -> Optional["Activity"]:
         return cls.get_or_none(cls.name == name)
-        
+
     @classmethod
-    def get_activities_by_names(cls, names: list[str]) -> Optional["Activity"]:
-        return list(cls.select().where(cls.name in names))
+    def get_activities_by_names(cls, names: list[str]) -> List["Activity"]:
+        if not names:
+            return []
+        return list(cls.select().where(cls.name.in_(names)))
     
     def get_requests(self) -> List["Request"]:
         return list(self.requests)

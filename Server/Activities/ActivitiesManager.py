@@ -153,7 +153,7 @@ class ActivitiesManager:
                             else:
                                 message_error = f"No client found. Client id: {client}"
                 else:
-                    message_error = f"No activities found with that names : {', '.join(activities_type)}"
+                    message_error = f"No activities found with that names : [{', '.join(activities_type)}]"
             else:
                 message_error = "No 'client_uid' key in data"
         else:
