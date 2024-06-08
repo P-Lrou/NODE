@@ -10,32 +10,33 @@ class PlaySound:
     init_path = Path.instance().init_sound
 
     @classmethod
-    def __play_sound(cls, file, volume=100):
-        DLog.LogSuccess("PLAY SOUND")
-        
-        # Load the audio file
-        data, fs = sf.read(file, dtype='float32')
-        
-        # Adjust volume
-        data *= volume / 100.0
-        
-        # Play the sound
-        sd.play(data, samplerate=fs)
-        sd.wait()
+    def __play_sound(cls, file_path: str, volume: int = 100) -> None:
+        if file_path is not None:
+            DLog.LogSuccess("PLAY SOUND")
+            # Load the audio file
+            data, fs = sf.read(file_path, dtype='float32')
+            # Adjust volume
+            data *= volume / 100.0
+            # Play the sound
+            sd.play(data, samplerate=fs)
+            sd.wait()
+        else:
+            DLog.LogError("There is no file to play")
 
     @classmethod
-    def play_sound(cls, file_name, volume=100):
-        sound_path = cls.init_path + file_name
-        cls.__play_sound(sound_path, volume)
+    def play(cls, file_name: str, volume: int = 100) -> None:
+        if file_name is not None:
+            sound_path = cls.init_path + file_name
+            cls.__play_sound(sound_path, volume)
     
     @classmethod
-    def print(cls):
+    def print(cls) -> None:
         volume = 100
         print_path = cls.init_path + Path.instance().found_sound
         cls.__play_sound(print_path, volume)
         
     @classmethod
-    def error(cls):
+    def error(cls) -> None:
         volume = 100
         print_path = cls.init_path + Path.instance().error_sound
         cls.__play_sound(print_path, volume)

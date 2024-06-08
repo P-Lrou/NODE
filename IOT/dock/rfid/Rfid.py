@@ -1,6 +1,13 @@
 import RPi.GPIO as GPIO
-from rfid.mfrc522 import SimpleMFRC522
-from rfid.RfidDelegate import RfidDelegate
+
+#* TOOLS
+from tools.DLog import DLog
+
+#* RFID
+from dock.rfid.mfrc522 import SimpleMFRC522
+from dock.rfid.RfidDelegate import RfidDelegate
+from dock.rfid.Badge import Badge
+
 from checker.CheckerInterface import CheckerInterface
 import spidev
 import time
@@ -20,7 +27,7 @@ class Rfid(CheckerInterface):
 
         self.card_presence = False
         self.array_detect_state = []
-        self.last_text_read = None
+        self.last_badge_detected: Badge = None
         self.test_timeout_seconds = 10 
 
     def __reinit(self):
@@ -41,19 +48,18 @@ class Rfid(CheckerInterface):
         self.__open()
         id, text = self.reader.read_no_block()
         if id:
-            self.last_text_read = text.strip()
-            rfid_data = {
-                "id": id,
-                "text": text.replace(" ", "")
-            }
+            text = text.strip().replace(" ", "")
+            if len(text) == 0:
+                DLog.LogError("Error to read")
+            badge = Badge(id, text)
+            self.last_badge_detected = badge
             self.array_detect_state = []
             if self.delegate:
-                self.delegate.rfid_detected(self, rfid_data)
+                self.delegate.rfid_detected(badge, self)
                 if not self.card_presence:
-                    self.delegate.rfid_placed(self, rfid_data)
+                    self.delegate.rfid_placed(badge, self)
             self.card_presence = True
         else:
-            rfid_data = {}
             self.array_detect_state.append(None)
             if len(self.array_detect_state) >= 2:
                 self.array_detect_state = []

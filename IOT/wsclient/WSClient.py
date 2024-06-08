@@ -78,14 +78,3 @@ class WSClient(Thread):
         self.stop_event.set()
         if self.ws:
             self.ws.close()
-
-    @staticmethod
-    def connectToVPS(delegate=None):
-        uri = "ws://{ip}:{port}".format(
-            ip="websocket.rezurrection.website", port=8765)
-        return WSClient(uri, delegate)
-
-    @staticmethod
-    def connectToLocalhost(delegate=None):
-        uri = "ws://{ip}:{port}".format(ip="localhost", port=9000)
-        return WSClient(uri, delegate)

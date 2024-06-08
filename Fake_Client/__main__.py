@@ -36,7 +36,7 @@ class MyDelegate(WSDelegate):
 
 #! ATTENTION SI PLUSIEURS DATA TO SEND => UN TIME.SLEEP EST EFFECTUE
 data_to_send = [
-    ActivitySimulation.add_scrabble()
+    ActivitySimulation.add_petanque()
 ]
 my_delegate = MyDelegate(data_to_send)
 # client = WSClient.connectToLocalhost(my_delegate)
