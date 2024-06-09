@@ -87,7 +87,7 @@ class DockManager(DockDelegate):
         for dock in self.docks:
             if dock.has_activity_type(activity_type):
                 dock.searching()
-            else:
+            elif not dock.has_activity():
                 dock.off()
     
     def activity_leave(self, activity_type: str) -> None:
