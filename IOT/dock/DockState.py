@@ -10,61 +10,60 @@ class DockState:
         self.dock = dock
         self.debug = True
 
-    def off(self):
+    def __cant_change_state(self, next_class_name):
         class_name = self.__class__.__name__
-        if self.debug and class_name != "OffState":
-            DLog.LogWarning(f"Can't change {class_name} to OffState")
+        if self.debug and class_name != next_class_name:
+            DLog.LogWarning(f"Can't change {class_name} state to {next_class_name} state")
+
+    def off(self):
+        next_class_name = DockOff.__name__
+        self.__cant_change_state(next_class_name)
 
     def on(self):
-        class_name = self.__class__.__name__
-        if self.debug and class_name != "OnState":
-            DLog.LogWarning(f"Can't change {class_name} to OnState")
+        next_class_name = DockOn.__name__
+        self.__cant_change_state(next_class_name)
 
     def waiting(self):
-        class_name = self.__class__.__name__
-        if self.debug and class_name != "WaitingState":
-            DLog.LogWarning(f"Can't change {class_name} to WaitingState")
+        next_class_name = DockOff.__name__
+        self.__cant_change_state(next_class_name)
 
     def searching(self):
-        class_name = self.__class__.__name__
-        if self.debug and class_name != "SearchingState":
-            DLog.LogWarning(f"Can't change {class_name} to SearchingState")
+        next_class_name = DockSearching.__name__
+        self.__cant_change_state(next_class_name)
 
     def found(self):
-        class_name = self.__class__.__name__
-        if self.debug and class_name != "FoundState":
-            DLog.LogWarning(f"Can't change {class_name} to FoundState")
+        next_class_name = DockFound.__name__
+        self.__cant_change_state(next_class_name)
 
     def not_found(self):
-        class_name = self.__class__.__name__
-        if self.debug and class_name != "NotFoundState":
-            DLog.LogWarning(f"Can't change {class_name} to NotFoundState")
+        next_class_name = DockNotFound.__name__
+        self.__cant_change_state(next_class_name)
 
     def _off(self):
         self.dock.launch_stop()
-        self.dock.set_state(OffState(self.dock))
+        self.dock.set_state(DockOff(self.dock))
     
     def _on(self):
         self.dock.launch_fill()
-        self.dock.set_state(OnState(self.dock))
+        self.dock.set_state(DockOn(self.dock))
     
     def _waiting(self):
         self.dock.launch_wait()
-        self.dock.set_state(WaitingState(self.dock))
+        self.dock.set_state(DockWaiting(self.dock))
     
     def _searching(self):
         self.dock.launch_circle()
-        self.dock.set_state(SearchingState(self.dock))
+        self.dock.set_state(DockSearching(self.dock))
     
     def _found(self):
         self.dock.launch_success()
-        self.dock.set_state(FoundState(self.dock))
+        self.dock.set_state(DockFound(self.dock))
 
     def _not_found(self):
         self.dock.launch_stop()
-        self.dock.set_state(NotFoundState(self.dock))
+        self.dock.set_state(DockNotFound(self.dock))
  
-class OffState(DockState):
+class DockOff(DockState):
     def __init__(self, dock: "Dock") -> None:
         super().__init__(dock)
 
@@ -74,7 +73,7 @@ class OffState(DockState):
     def waiting(self):
         self._waiting()
 
-class OnState(DockState):
+class DockOn(DockState):
     def __init__(self, dock: "Dock") -> None:
         super().__init__(dock)
 
@@ -87,7 +86,7 @@ class OnState(DockState):
     def searching(self):
         self._searching()
 
-class WaitingState(DockState):
+class DockWaiting(DockState):
     def __init__(self, dock: "Dock") -> None:
         super().__init__(dock)
 
@@ -97,7 +96,7 @@ class WaitingState(DockState):
     def on(self):
         self._on()
 
-class SearchingState(DockState):
+class DockSearching(DockState):
     def __init__(self, dock: "Dock") -> None:
         super().__init__(dock)
 
@@ -110,7 +109,7 @@ class SearchingState(DockState):
     def not_found(self):
         self._not_found()
 
-class FoundState(DockState):
+class DockFound(DockState):
     def __init__(self, dock: "Dock") -> None:
         super().__init__(dock)
 
@@ -120,7 +119,7 @@ class FoundState(DockState):
     def searching(self):
         self._searching()
 
-class NotFoundState(DockState):
+class DockNotFound(DockState):
     def __init__(self, dock: "Dock") -> None:
         super().__init__(dock)
 
@@ -129,3 +128,4 @@ class NotFoundState(DockState):
 
     def searching(self):
         self._searching()
+

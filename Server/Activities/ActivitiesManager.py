@@ -108,13 +108,13 @@ class ActivitiesManager:
                             if not attempting_request:
                                 request = Request.insert(Request.ATTEMPTING, activity, client)
                                 if request:
-                                    join_message = json_encode({"type": "join", "activity_type": activity.name})
-                                    join_targets = [data["client_uid"]]
+                                    search_message = json_encode({"type": "search", "activity_type": activity.name})
+                                    search_targets = [data["client_uid"]]
                                     data_to_send.append({
-                                        "targets": join_targets,
-                                        "message": join_message
+                                        "targets": search_targets,
+                                        "message": search_message
                                     })
-                                    DLog.LogWhisper(f"New join: {activity.name}")
+                                    DLog.LogWhisper(f"New search: {activity.name}")
                                     
                                     # Check for group only after processing all activities
                                     if key == len(activities) - 1:
@@ -161,10 +161,10 @@ class ActivitiesManager:
                             request = client.get_attempting_request_by_activity(activity)
                             if request:
                                 request.update_state(Request.REFUSED)
-                                leave_message = json_encode({"type": "leave", "activity_type": activity.name})
+                                cancel_message = json_encode({"type": "cancel", "activity_type": activity.name})
                                 data_to_send.append({
                                     "targets": [data["client_uid"]],
-                                    "message": leave_message
+                                    "message": cancel_message
                                 })
                                 DLog.LogWhisper(f"Cancel request: {activity.name}")
                             else:

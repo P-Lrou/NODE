@@ -18,14 +18,14 @@ class MessageHandler:
                 # BLINK CLASSIC LED
                 self.trafic_led.all_blinking(blinking_repeat=1)
                 pass
-            elif json_message["type"] == "join":
+            elif json_message["type"] == "search":
                 activity_type = json_message["activity_type"]
                 # LIGHT ON RING LED
-                self.iot_manager.dock_manager.activity_join(activity_type)
-            elif json_message["type"] == "leave":
+                self.iot_manager.dock_manager.activity_search(activity_type)
+            elif json_message["type"] == "cancel":
                 activity_type = json_message["activity_type"]
                 # LIGHT OFF RING LEDS
-                self.iot_manager.dock_manager.activity_leave(activity_type)
+                self.iot_manager.dock_manager.activity_cancel(activity_type)
             elif json_message["type"] == "found":
                 activity_type = json_message["activity_type"]
                 # LIGHT ON FOUND RING LED

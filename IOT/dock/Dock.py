@@ -17,10 +17,9 @@ from dock.rfid.Badge import *
 from dock.neoled.NeoLed import NeoLed
 
 class Dock(RfidDelegate):
-    def __init__(self, id: int, delegate: DockDelegate) -> None:
-        self.id = id
+    def __init__(self, delegate: DockDelegate) -> None:
         self.delegate = delegate
-        self.state: DockState = OffState(self)
+        self.state: DockState = DockOff(self)
         self.rfid: Rfid = None
         self.ring_led: NeoLed = None
         self.sounds = {
@@ -34,6 +33,7 @@ class Dock(RfidDelegate):
         self._has_activity = False
 
     def set_state(self, state: DockState):
+        DLog.LogWhisper(f"Passing to {state.__class__.__name__} state")
         self.state = state
 
     def set_rfid(self, pin_number: int) -> None:
@@ -99,10 +99,16 @@ class Dock(RfidDelegate):
         return activity_type == self.activity_badge.get_activity()
     
     def is_requestable(self):
-        return isinstance(self.state, OnState)
+        return isinstance(self.state, DockOn) and self.has_activity()
     
     def is_cancelable(self):
-        return isinstance(self.state, SearchingState)
+        return isinstance(self.state, DockSearching) and self.has_activity()
+    
+    def is_foundable(self):
+        return isinstance(self.state, DockSearching) and self.has_activity()
+
+    def is_searching(self):
+        return isinstance(self.state, DockSearching)
         
     #* NEOLED PART
 

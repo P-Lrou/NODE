@@ -20,7 +20,7 @@ class WSManager:
         else:
             Timer().start(self.interval_retrying, self.ws_client.send_message, json_encode(data))
     
-    def send_activities_request(self, activities_type) -> None:
+    def send_activities_request(self, activities_type: list[str]) -> None:
         data = {
             "type": "activity",
             "activities_type": activities_type,
@@ -28,7 +28,7 @@ class WSManager:
         }
         self.__send_message(data)
 
-    def send_activities_cancel(self, activities_type) -> None:
+    def send_activities_cancel(self, activities_type: list[str]) -> None:
         data = {
             "type": "activity",
             "activities_type": activities_type,
