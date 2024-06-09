@@ -2,9 +2,7 @@ from led.Led import Led
 from tools.DLog import DLog
 import time
 
-#* MAKE SURE TO CLOSE AT THE END OF YOUR CODE
-class LEDController:
-        
+class LEDManager:
     def __init__(self, pin_numbers: list[int] = None, pin_by_name: dict[str, int]=None):
         self.counter = 0
         self.leds: list[Led] = []

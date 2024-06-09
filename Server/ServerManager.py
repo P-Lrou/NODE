@@ -41,7 +41,7 @@ class ServerManager:
             try:
                 while not self.stop_event.is_set():
                     if self.ws_server.server is not None:
-                        self.activity_manager.check_requests_waiting_time(self.ws_server_delegate.send_messages)
+                        self.activity_manager.check_requests_waiting_time(self.ws_server_delegate.send_messages, server=self.ws_server.server)
             except KeyboardInterrupt:
                 pass
 

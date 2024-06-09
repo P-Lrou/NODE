@@ -23,9 +23,9 @@ class ActivityBuilder:
         }
     
     @staticmethod
-    def set_activity(activity):
+    def set_activity(activities):
         return {
-            "activity_type": activity
+            "activities_type": activities
         }
     
     def merge_data(type, state, activity):
@@ -36,113 +36,29 @@ class ActivityBuilder:
         }
 
 class ActivitySimulation:
+    BELOTE = "belote"
+    SCRABBLE = "scrabble"
+    GOUTER = "gouter"
+    PROMENADE = "promenade"
+    PETANUE = "petanue"
+    TRIOMINO = "triomino"
     def __init__(self) -> None:
         pass
 
     @staticmethod
-    def add_belote():
+    def add(activities):
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("belote")
+            ActivityBuilder.set_activity(activities)
         )
         return data
     
     @staticmethod
-    def remove_belote():
+    def remove(activities):
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("belote")
-        )
-        return data
-    
-    @staticmethod
-    def add_scrabble():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("scrabble")
-        )
-        return data
-    
-    @staticmethod
-    def remove_scrabble():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("scrabble")
-        )
-        return data
-    
-    @staticmethod
-    def add_gouter():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("gouter")
-        )
-        return data
-    
-    @staticmethod
-    def remove_gouter():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("gouter")
-        )
-        return data
-    
-    @staticmethod
-    def add_promenade():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("promenade")
-        )
-        return data
-    
-    @staticmethod
-    def remove_promenade():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("promenade")
-        )
-        return data
-    
-    @staticmethod
-    def add_petanque():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("petanque")
-        )
-        return data
-    
-    @staticmethod
-    def remove_petanque():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("petanque")
-        )
-        return data
-    
-    @staticmethod
-    def add_triomino():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("triomino")
-        )
-        return data
-    
-    @staticmethod
-    def remove_triomino():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("triomino")
+            ActivityBuilder.set_activity(activities)
         )
         return data

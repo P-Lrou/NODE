@@ -126,3 +126,4 @@ coverage/
 
 # Data file
 Server/activities.json
+IOT/ressources/images/generating/*
