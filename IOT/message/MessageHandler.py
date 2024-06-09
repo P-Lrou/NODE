@@ -1,47 +1,36 @@
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from IOTManager import IOTManager
 from GlobalVariables import *
 from tools.Sound import PlaySound
 from printer.Printer import ThermalPrinter
-from dock.Dock import Dock
+from led.LedManager import LEDManager
 
 class MessageHandler:
-    def __init__(self, parent) -> None:
-        self.parent = parent
+    def __init__(self, iot_manager: "IOTManager") -> None:
+        self.iot_manager = iot_manager
+        self.trafic_led = LEDManager(pin_numbers=LedPins.instance().trafic_number)
 
     def process_message(self, json_message):
         if "type" in json_message:
             if json_message["type"] == "new_request":
+                # BLINK CLASSIC LED
+                self.trafic_led.all_blinking(blinking_repeat=1)
                 pass
             elif json_message["type"] == "join":
-                # TODO: PLAY JOIN SOUND
-                # PlaySound.join()
-                # LIGHT ON RING LED
                 activity_type = json_message["activity_type"]
-                if self.parent:
-                    dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_circle()
-                pass
+                # LIGHT ON RING LED
+                self.iot_manager.dock_manager.activity_join(activity_type)
             elif json_message["type"] == "leave":
                 activity_type = json_message["activity_type"]
-                # TODO: PLAY LEAVE SOUND
-                # PlaySound.leave()
                 # LIGHT OFF RING LEDS
-                activity_type = json_message["activity_type"]
-                if self.parent:
-                    dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_stop()
-                pass
+                self.iot_manager.dock_manager.activity_leave(activity_type)
             elif json_message["type"] == "found":
                 activity_type = json_message["activity_type"]
-                # TODO: PLAY PRINTING SOUND
-                # PlaySound.print()
-                # LIGHT ON RING LED
-                activity_type = json_message["activity_type"]
-                if self.parent:
-                    dock: Dock = self.parent.get_dock_by_activity(activity_type)
-                    dock.launch_success()
-                    docks: list[Dock] = self.parent.get_docks_by_non_activity(activity_type)
-                    for dock in docks:
-                        dock.launch_stop()
+                # LIGHT ON FOUND RING LED
+                self.iot_manager.dock_manager.activity_found(activity_type)
+                # PLAY PRINTING SOUND
+                PlaySound.print()
                 #TODO: GENERATE IMAGE
                 image_path = "ressources/images/ticket_imprimante.png"
                 # PRINT IMAGE
@@ -51,14 +40,9 @@ class MessageHandler:
                 ThermalPrinter.switch_state()
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":
-                #TODO: PLAY NOT_FOUND SOUND
-                # BLINKING ERROR ACTIVITY LED
                 activity_type = json_message["activity_type"]
-                if self.parent:
-                    docks: list[Dock] = self.parent.get_docks()
-                    for dock in docks:
-                        dock.launch_error()
-                pass
+                # LIGHT ON NOT FOUND RING LED
+                self.iot_manager.dock_manager.activity_not_found(activity_type)
             else:
                 PlaySound.error()
                 DLog.LogError("Unknown type")

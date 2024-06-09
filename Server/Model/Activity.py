@@ -19,11 +19,13 @@ class Activity(BaseModel):
 
     @classmethod
     def get_activity_by_name(cls, name: str) -> Optional["Activity"]:
-        if name:
-            return cls.get_or_none(cls.name == name)
-        else:
-            DLog.LogError("Name is required")
-            return None
+        return cls.get_or_none(cls.name == name)
+
+    @classmethod
+    def get_activities_by_names(cls, names: list[str]) -> List["Activity"]:
+        if not names:
+            return []
+        return list(cls.select().where(cls.name.in_(names)))
     
     def get_requests(self) -> List["Request"]:
         return list(self.requests)

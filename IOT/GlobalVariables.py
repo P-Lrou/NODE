@@ -12,20 +12,7 @@ class Singleton:
 
 class LedPins(Singleton):
     def __init__(self):
-        self.trafic_number: list[int] = [14]
-        self.good_rfid_number: list[int] = [23, 7, 20]
-        self.error_rfid_number: list[int] = [24, 1, 21]
-        
-        rfid_ids = RfidPins.instance().rfid_number
-        if len(self.good_rfid_number) == len(rfid_ids):
-            self.good_rfid_led_number: dict[str, int] = {str(id): self.good_rfid_number[key] for key, id in enumerate(rfid_ids)}
-        else:
-            DLog.LogError("No length matching between good_rfid_number and rfid_ids")
-
-        if len(self.error_rfid_number) == len(rfid_ids):
-            self.error_rfid_led_number: dict[str, int] = {str(id): self.error_rfid_number[key] for key, id in enumerate(rfid_ids)}
-        else:
-            DLog.LogError("No length matching between error_rfid_number and rfid_ids")
+        self.trafic_number: list[int] = [17, 27, 22]
     
 class NeoLedPins(Singleton):
     def __init__(self):
@@ -53,7 +40,7 @@ class Activities(Singleton):
             "petanque",
             "promenade"
         ]
-
+        
 class Path(Singleton):
     def __init__(self) -> None:
         self.init_sound = "ressources/sound/"

@@ -1,43 +1,42 @@
-import subprocess
+import sounddevice as sd
+import soundfile as sf
 from tools.DLog import DLog
+from GlobalVariables import Path
 
 class PlaySound:
-    join_file = 'ressources/sound/discord_join.wav'
-    leave_file = 'ressources/sound/discord_leave.wav'
-    print_file = 'ressources/sound/print.wav'
-    error_file = 'ressources/sound/error.wav'
+    # command to run for jack : 
+    # sudo jackd -d alsa -d hw:0 -r 44100 &
 
-    @staticmethod
-    def set_volume(volume):
-        # Assurez-vous que le volume est une valeur entre 0 et 100
-        volume = max(0, min(100, volume))
-        subprocess.run(['amixer', 'sset', 'Master', f'{volume}%'])
+    init_path = Path.instance().init_sound
 
-    @staticmethod
-    def play_sound(file, volume=100):
-        DLog.LogSuccess("PLAY SOUND")
-        PlaySound.set_volume(volume)
-        subprocess.run(['aplay', file])
+    @classmethod
+    def __play_sound(cls, file_path: str, volume: int = 100) -> None:
+        if file_path is not None:
+            DLog.LogSuccess("PLAY SOUND")
+            # Load the audio file
+            data, fs = sf.read(file_path, dtype='float32')
+            # Adjust volume
+            data *= volume / 100.0
+            # Play the sound
+            sd.play(data, samplerate=fs)
+            sd.wait()
+        else:
+            DLog.LogError("There is no file to play")
 
-    @staticmethod
-    def join():
-        volume = 50
-        PlaySound.play_sound(PlaySound.join_file, volume)
+    @classmethod
+    def play(cls, file_name: str, volume: int = 100) -> None:
+        if file_name is not None:
+            sound_path = cls.init_path + file_name
+            cls.__play_sound(sound_path, volume)
     
-    @staticmethod
-    def leave():
+    @classmethod
+    def print(cls) -> None:
         volume = 100
-        PlaySound.play_sound(PlaySound.leave_file, volume)
-    
-    @staticmethod
-    def print():
+        print_path = cls.init_path + Path.instance().found_sound
+        cls.__play_sound(print_path, volume)
+        
+    @classmethod
+    def error(cls) -> None:
         volume = 100
-        PlaySound.play_sound(PlaySound.print_file, volume)
-    
-    @staticmethod
-    def error():
-        volume = 70
-        PlaySound.play_sound(PlaySound.error_file, volume)
-
-if __name__ == "__main__":
-    PlaySound.join()
+        print_path = cls.init_path + Path.instance().error_sound
+        cls.__play_sound(print_path, volume)
