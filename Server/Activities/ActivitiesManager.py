@@ -87,6 +87,8 @@ class ActivitiesManager:
     @classmethod
     def new_request(cls, data: dict) -> list[dict]:
         data_to_send: list[dict] = []
+        message_error = ""
+
         if "activities_type" in data: 
             activities_type = data["activities_type"]
             if "client_uid" in data: 
@@ -98,12 +100,13 @@ class ActivitiesManager:
                         "message": request_message
                     })
                     DLog.LogWhisper(f"New request")
-                    for key, activity in enumerate(activities):
-                        client: Client = Client.get_first_client_by_uid(data["client_uid"])
-                        if client:
+                    
+                    client: Client = Client.get_first_client_by_uid(data["client_uid"])
+                    if client:
+                        for key, activity in enumerate(activities):
                             attempting_request = client.get_attempting_request_by_activity(activity)
                             if not attempting_request:
-                                request = Request.insert("", activity, client)
+                                request = Request.insert(Request.ATTEMPTING, activity, client)
                                 if request:
                                     join_message = json_encode({"type": "join", "activity_type": activity.name})
                                     join_targets = [data["client_uid"]]
@@ -112,73 +115,76 @@ class ActivitiesManager:
                                         "message": join_message
                                     })
                                     DLog.LogWhisper(f"New join: {activity.name}")
+                                    
+                                    # Check for group only after processing all activities
                                     if key == len(activities) - 1:
                                         has_groupe, new_data = cls.looking_for_groupe(client)
                                         if has_groupe:
                                             data_to_send.append(new_data)
-                                    return data_to_send
                                 else:
                                     message_error = "Error to insert a request"
+                                    break
                             else:
-                                message_error = f"Request for activity {activity.name} already exist"
-                        else:
-                            message_error = f"No client found with uid: {data['client_uid']}"
+                                message_error = f"Request for activity {activity.name} already exists"
+                                break
+                    else:
+                        message_error = f"No client found with uid: {data['client_uid']}"
                 else:
-                    message_error = f"No activities found with that names : {', '.join(activities_type)}"
+                    message_error = f"No activities found with that names: {', '.join(activities_type)}"
             else:
                 message_error = "No 'client_uid' key in data"
         else:
             message_error = "No 'activities_type' in data"
         
-        if not message_error:
-            message_error = "THERE IS A BIG ERROR"
-        data_to_send.append({
-            "targets": [data["client_uid"]],
-            "message": message_error
-        })
-        DLog.LogError(message_error)
+        if message_error:
+            data_to_send.append({
+                "targets": [data["client_uid"]],
+                "message": message_error
+            })
+            DLog.LogError(message_error)
         return data_to_send
+
 
     @staticmethod
     def cancel(data: dict) -> list[dict]:
         data_to_send: list[dict] = []
+        message_error = ""
+        
         if "activities_type" in data:
             activities_type = data["activities_type"]
             if "client_uid" in data:
                 activities: list[Activity] = Activity.get_activities_by_names(activities_type)
                 if len(activities) > 0:
-                    for activity in activities:
-                            client: Client = Client.get_first_client_by_uid(data["client_uid"])
-                            if client:
-                                request = client.get_attempting_request_by_activity(activity)
-                                print(request)
-                                if request:
-                                    request.update_state(Request.REFUSED)
-                                    leave_message = json_encode({"type": "leave", "activity_type": activity.name})
-                                    data_to_send.append({
-                                        "targets": [data["client_uid"]],
-                                        "message": leave_message
-                                    })
-                                    DLog.LogWhisper(f"Cancel request: {activity.name}")
-                                    return data_to_send
-                                else:
-                                    message_error = f"Request of activity client not found. Client id: {client}, Activity: {activity.name}"
+                    client: Client = Client.get_first_client_by_uid(data["client_uid"])
+                    if client:
+                        for activity in activities:
+                            request = client.get_attempting_request_by_activity(activity)
+                            if request:
+                                request.update_state(Request.REFUSED)
+                                leave_message = json_encode({"type": "leave", "activity_type": activity.name})
+                                data_to_send.append({
+                                    "targets": [data["client_uid"]],
+                                    "message": leave_message
+                                })
+                                DLog.LogWhisper(f"Cancel request: {activity.name}")
                             else:
-                                message_error = f"No client found. Client id: {client}"
+                                message_error = f"Request for activity {activity.name} not found for client {data['client_uid']}."
+                                break
+                    else:
+                        message_error = f"No client found with uid: {data['client_uid']}"
                 else:
-                    message_error = f"No activities found with that names : [{', '.join(activities_type)}]"
+                    message_error = f"No activities found with names: {', '.join(activities_type)}"
             else:
                 message_error = "No 'client_uid' key in data"
         else:
             message_error = "No 'activities_type' in data"
-        
-        if not message_error:
-            message_error = "THERE IS A BIG ERROR"
-        data_to_send.append({
-            "targets": [data["client_uid"]],
-            "message": message_error
-        })
-        DLog.LogError(message_error)
+
+        if message_error:
+            data_to_send.append({
+                "targets": [data["client_uid"]],
+                "message": message_error
+            })
+            DLog.LogError(message_error)
         return data_to_send
 
     @staticmethod
@@ -203,7 +209,7 @@ class ActivitiesManager:
         else:
             DLog.LogError(f"No client found. uid: {client['uid']}")
 
-    def check_requests_waiting_time(self, callback):
+    def check_requests_waiting_time(self, callback, server):
         data_to_send: list[dict] = []
         requests: list[Request] = Request.get_attempting_requests()
         for request in requests:
@@ -222,7 +228,7 @@ class ActivitiesManager:
                         "message": not_found_message
                     })
         if len(data_to_send) > 0:
-            callback(data_to_send)
+            callback(server, data_to_send)
 
     def test(self) -> bool:
         for table in self.tables:
