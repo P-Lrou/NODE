@@ -42,7 +42,20 @@ class ActivitiesManager:
                     participant: Participant = Participant.insert(attempting_client, room)
                     if participant:
                         targets = [attempting_client.uid for attempting_client in attempting_clients]
-                        new_groupe = json_encode({"type": "found", "activity_type": activity.name, "rdv_at": str(room.get_rdv_time())})
+                        new_groupe = json_encode({
+                            "type": "found", "activity_type": activity.name, "ticket": {
+                                "activity": activity.name,
+                                "hour": str(room.get_rdv_time()),
+                                "names": [
+                                        "michelle",
+                                        "bertrand",
+                                        "marie",
+                                        "jean-claude",
+                                        "jacques"
+                                ],
+                                "location": "réfectoire"
+                            }
+                        })
                     else:
                         DLog.LogError(f"Error to insert a participant. Client id: {attempting_client}, Room id: {room}")
                         return False, {}
