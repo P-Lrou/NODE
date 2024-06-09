@@ -12,7 +12,7 @@ class Ticket:
         self.top_padding = 250
 
     def generate_image(self) -> str:
-        image_path = f"{Path.instance().init_image}result.png"
+        image_path = f"{Path.instance().init_image}generating/result.png"
         if len(self.participants) > 4:
             image_name = "ticket_6_participants.png"
         else:

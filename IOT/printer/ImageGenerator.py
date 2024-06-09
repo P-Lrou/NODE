@@ -79,7 +79,7 @@ class ImageGenerator:
             # Draw the original rectangle (rect_position)
             draw.rectangle([rect_x, rect_y, rect_x + rect_w, rect_y + rect_h], outline=Color.RED, width=1)
         # Save image to check
-        image.save(Path.instance().init_image + "test.png")
+        image.save(Path.instance().init_image + "generating/test.png")
 
     def get_image(self, image_name: str) -> Image:
         image = Image.open(Path.instance().init_image + image_name)
