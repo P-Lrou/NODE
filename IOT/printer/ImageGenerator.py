@@ -7,6 +7,10 @@ class ImageGenerator:
     def __init__(self) -> None:
         pass
 
+    def paste_image(self, original_image: Image, paste_image: Image, position: tuple[int, int] = (0, 0)) -> Image:
+        original_image.paste(paste_image, position, paste_image if paste_image.mode == 'RGBA' else None)
+        return original_image
+
     def write_text(self, image: Image, text_accessories: TextAccessories, debug: bool = False):
         """
         This method overwrites the image object with the writing text
@@ -79,4 +83,8 @@ class ImageGenerator:
 
     def get_image(self, image_name: str) -> Image:
         image = Image.open(Path.instance().init_image + image_name)
+        return image
+    
+    def get_new_image(self, size:tuple[int, int], rgba: tuple[int, int, int, int]) -> Image:
+        image = Image.new('RGBA', size=size, color=rgba)
         return image

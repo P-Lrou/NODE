@@ -1,8 +1,8 @@
 from printer.Ticket import Ticket
 
 data = {
-    "activity_type": "promenade",
-    "rdv_at": "14H30",
+    "activity": "promenade",
+    "hour": "14H30",
     "names": [
         "michelle",
         "bertrand",

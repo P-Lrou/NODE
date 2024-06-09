@@ -3,12 +3,13 @@ from printer.ImageGenerator import ImageGenerator, Image
 from printer.TextAccessories import TextAccessories
 
 class Ticket:
-    def __init__(self, activity: str, hour: str, participants: list[str], location: str = "RÉFECTOIRE") -> None:
+    def __init__(self, activity: str, hour: str, participants: list[str], location: str) -> None:
         self.activity = activity.upper()
-        self.hour = hour.upper()
+        self.hour = hour.replace(":", "h").upper()
         self.participants = [participant.upper() for participant in participants]
         self.location = location.upper()
         self.image_generator = ImageGenerator()
+        self.top_padding = 250
 
     def generate_image(self) -> str:
         image_path = f"{Path.instance().init_image}result.png"
@@ -36,10 +37,13 @@ class Ticket:
             self.image_generator.write_text(image, text_participant)
         text_location = TextAccessories.text_location(self.location, len(self.participants))
         self.image_generator.write_text(image, text_location)
-        image = image.rotate(180, expand=1)
-        image.save(image_path)
+        width, height = image.size
+        final_image = self.image_generator.get_new_image((width, height + self.top_padding), (255, 255, 255, 255))
+        final_image = self.image_generator.paste_image(final_image, image, (0, self.top_padding))
+        final_image = final_image.rotate(180, expand=1)
+        final_image.save(image_path)
         return image_path
 
     @classmethod
-    def from_data(cls, data) -> "Ticket":
-        return cls(data["activity_type"], data["rdv_at"], data["names"])
+    def from_data(cls, data: dict) -> "Ticket":
+        return cls(data.get("activity", ""), data.get("hour", ""), data.get("names", []), data.get("location", "réfectoire"))

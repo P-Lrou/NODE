@@ -4,6 +4,7 @@ if TYPE_CHECKING:
 from GlobalVariables import *
 from tools.Sound import PlaySound
 from printer.Printer import ThermalPrinter
+from printer.Ticket import Ticket
 from led.LedManager import LEDManager
 
 class MessageHandler:
@@ -31,13 +32,14 @@ class MessageHandler:
                 self.iot_manager.dock_manager.activity_found(activity_type)
                 # PLAY PRINTING SOUND
                 PlaySound.print()
-                #TODO: GENERATE IMAGE
-                image_path = "ressources/images/ticket_imprimante.png"
+                # GENERATE IMAGE
+                ticket = Ticket.from_data(json_message["ticket"])
+                image_path = ticket.generate_image()
                 # PRINT IMAGE
-                ThermalPrinter.switch_state()
-                time.sleep(3)
+                # ThermalPrinter.switch_state()
+                # time.sleep(3)
                 ThermalPrinter.print(image_path)
-                ThermalPrinter.switch_state()
+                # ThermalPrinter.switch_state()
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":
                 activity_type = json_message["activity_type"]
