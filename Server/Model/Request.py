@@ -25,7 +25,8 @@ class Request(BaseModel):
     state_possibilities = [
         ACCEPTED,
         REFUSED,
-        ATTEMPTING
+        ATTEMPTING,
+        DISCONNECTED
     ]
 
     class Meta:

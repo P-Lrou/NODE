@@ -44,6 +44,7 @@ class WSServer(Testable):
                     server.send_message(client, welcome_message)
                     if self.delegate:
                         self.delegate.new_client(uid)
+                    return
                 else:
                     uid = data_message["uid"]
                     client["uid"] = uid

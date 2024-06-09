@@ -55,7 +55,7 @@ class ActivitiesManager:
                     request.update_state(Request.ACCEPTED)
                     participant: Participant = Participant.insert(attempting_client, room)
                     if participant:
-                        names.append(attempting_client.contact.name)
+                        # names.append(attempting_client.contact.name)
                         new_groupe_targets.append(attempting_client.uid)
                     else:
                         DLog.LogError(f"Error to insert a participant. Client id: {attempting_client}, Room id: {room}")
