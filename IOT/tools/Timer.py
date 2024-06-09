@@ -3,7 +3,7 @@ import functools
 import inspect
 
 class Timer:
-    _instance = None
+    _instance = {}
     _lock = threading.Lock()
 
     def __init__(self):
@@ -69,10 +69,10 @@ class Timer:
             return None
 
     @classmethod
-    def instance(cls) -> "Timer":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
+    def instance(cls, name: str = "default") -> "Timer":
+        if name not in cls._instance:
+            cls._instance[name] = cls()
+        return cls._instance[name]
 
 # Exemple d'utilisation :
 if __name__ == "__main__":

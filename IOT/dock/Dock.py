@@ -57,16 +57,18 @@ class Dock(RfidDelegate):
 
     def rfid_placed(self, badge: Badge, rfid: Rfid):
         self.activity_badge = ActivityBadge(badge.id, badge.text)
-        self._has_activity = True
-        DLog.Log(f"{self.activity_badge.get_activity()} placed")
-        PlaySound.play(self.sounds["rfid"]["placed"], volume=self.sound_volume)
-        self.delegate.activity_added(self)
+        if self.activity_badge.is_known():
+            self._has_activity = True
+            DLog.Log(f"{self.activity_badge.get_activity()} placed")
+            PlaySound.play(self.sounds["rfid"]["placed"], volume=self.sound_volume)
+            self.delegate.activity_added(self)
 
     def rfid_removed(self, rfid: Rfid):
-        self._has_activity = False
-        DLog.Log(f"{self.activity_badge.get_activity()} removed")
-        PlaySound.play(self.sounds["rfid"]["removed"], volume=self.sound_volume)
-        self.delegate.activity_removed(self)
+        if self.activity_badge.is_known():
+            self._has_activity = False
+            DLog.Log(f"{self.activity_badge.get_activity()} removed")
+            PlaySound.play(self.sounds["rfid"]["removed"], volume=self.sound_volume)
+            self.delegate.activity_removed(self)
 
     #* STATE PART
 
@@ -76,8 +78,8 @@ class Dock(RfidDelegate):
     def on(self):
         self.state.on()
 
-    def waiting(self):
-        self.state.waiting()
+    def suggesting(self):
+        self.state.suggesting()
 
     def searching(self):
         self.state.searching()
@@ -87,6 +89,9 @@ class Dock(RfidDelegate):
 
     def not_found(self):
         self.state.not_found()
+    
+    def waiting(self):
+        self.state.waiting()
 
     #* REQUEST PART
 
@@ -99,10 +104,10 @@ class Dock(RfidDelegate):
         return activity_type == self.activity_badge.get_activity()
     
     def is_requestable(self):
-        return isinstance(self.state, DockOn) and self.has_activity()
+        return isinstance(self.state, (DockOn, DockWaiting)) and self.has_activity()
     
     def is_cancelable(self):
-        return isinstance(self.state, DockSearching) and self.has_activity()
+        return isinstance(self.state, DockSearching)
     
     def is_foundable(self):
         return isinstance(self.state, DockSearching) and self.has_activity()

@@ -9,14 +9,19 @@ class Badge:
 class ActivityBadge(Badge):
     def __init__(self, id, text) -> None:
         super().__init__(id, text)
+        self._known_activity = True
         activities = Activities.instance().activities
         data: list[str] = self.text.split(":")
         self.activity = data[0]
         if self.activity not in activities:
+            self._known_activity = False
             DLog.LogError(f"Unkown activity. Text: '{self.activity}'")
 
+    def is_known(self):
+        return self._known_activity
+
     def get_activity(self) -> str:
-        return self.activity
+        return self.activity if self._known_activity else None
     
     def get_color(self) -> str:
         data: list[str] = self.text.split(":")

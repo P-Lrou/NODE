@@ -18,7 +18,6 @@ class DockManager(DockDelegate):
             DLog.LogError("No matching number between rfid_pins and nums_pixels")
         else:
             for key, rfid_pin, num_pixels, sound in zip(range(len(nums_pixels)), rfid_pins, nums_pixels, sounds):
-                self.dock_changed.append(False)
                 dock = Dock(delegate=self)
                 dock.set_rfid(rfid_pin)
                 dock.set_ring_led(NeoLedPins.instance().pin_number, num_pixels, starting_pixel=key * num_pixels, total_pixels=NeoLedPins.instance().total_pixels)
@@ -26,6 +25,7 @@ class DockManager(DockDelegate):
                 self.docks.append(dock)
     
     def set_state(self, state: DockManagerState):
+        # Timer.instance("dock_manager").cancel()
         DLog.LogWhisper(f"Passing to {state.__class__.__name__} state")
         self.state = state
 
@@ -56,7 +56,7 @@ class DockManager(DockDelegate):
             dock.off()
 
     def request_activities(self) -> None:
-        activities_type: list[str] = [dock for dock in self.docks if dock.is_requestable()]
+        activities_type: list[str] = [dock.activity_badge.get_activity() for dock in self.docks if dock.is_requestable()]
         if len(activities_type) > 0:
             self.ws_manager.send_activities_request(activities_type)
         else:
@@ -70,7 +70,7 @@ class DockManager(DockDelegate):
             DLog.LogWarning("The dock is not cancelable")
 
     def cancel_activities(self) -> None:
-        activities_type: list[str] = [dock for dock in self.docks if dock.is_cancelable()]
+        activities_type: list[str] = [dock.activity_badge.get_activity() for dock in self.docks if dock.is_cancelable()]
         if len(activities_type) > 0:
             self.ws_manager.send_activities_cancel(activities_type)
         else:
