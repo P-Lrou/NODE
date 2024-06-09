@@ -29,6 +29,7 @@ class Dock(RfidDelegate):
                 "removed": None
             }
         }
+        self.sound_volume = 10
         self.activity_badge: ActivityBadge = None
         self._has_activity = False
 
@@ -58,13 +59,13 @@ class Dock(RfidDelegate):
         self.activity_badge = ActivityBadge(badge.id, badge.text)
         self._has_activity = True
         DLog.Log(f"{self.activity_badge.get_activity()} placed")
-        PlaySound.play(self.sounds["rfid"]["placed"])
+        PlaySound.play(self.sounds["rfid"]["placed"], volume=self.sound_volume)
         self.delegate.activity_added(self)
 
     def rfid_removed(self, rfid: Rfid):
         self._has_activity = False
         DLog.Log(f"{self.activity_badge.get_activity()} removed")
-        PlaySound.play(self.sounds["rfid"]["removed"])
+        PlaySound.play(self.sounds["rfid"]["removed"], volume=self.sound_volume)
         self.delegate.activity_removed(self)
 
     #* STATE PART
