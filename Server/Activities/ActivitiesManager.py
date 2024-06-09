@@ -32,8 +32,22 @@ class ActivitiesManager:
 
     @staticmethod
     def create_groupe(activity: Activity) -> tuple[bool, dict]:
+        new_groupe = {
+            "type": "found",
+            "activity_type": activity.name,
+            "ticket": {}
+        }
+        ticket = {
+            "activity": activity.name,
+            "hour": "",
+            "names": [],
+            "location": "réfectoire"
+        }
+        names = []
+        new_groupe_targets = []
         room: Room = Room.insert(activity)
         if room:
+            ticket["hour"] = str(room.get_rdv_time())
             attempting_clients = activity.get_attempting_clients()
             for attempting_client in attempting_clients:
                 request = attempting_client.get_attempting_request_by_activity(activity)
@@ -41,32 +55,31 @@ class ActivitiesManager:
                     request.update_state(Request.ACCEPTED)
                     participant: Participant = Participant.insert(attempting_client, room)
                     if participant:
-                        targets = [attempting_client.uid for attempting_client in attempting_clients]
-                        new_groupe = json_encode({
-                            "type": "found", "activity_type": activity.name, "ticket": {
-                                "activity": activity.name,
-                                "hour": str(room.get_rdv_time()),
-                                "names": [
-                                        "michelle",
-                                        "bertrand",
-                                        "marie",
-                                        "jean-claude",
-                                        "jacques"
-                                ],
-                                "location": "réfectoire"
-                            }
-                        })
+                        names.append(attempting_client.contact.name)
+                        new_groupe_targets.append(attempting_client.uid)
                     else:
                         DLog.LogError(f"Error to insert a participant. Client id: {attempting_client}, Room id: {room}")
                         return False, {}
                 else:
                     DLog.LogError(f"Request of activity client not found. Client id: {attempting_client}, Activity: {activity.name}")
                     return False, {}
+                attempting_requests = attempting_client.get_attempting_requests()
+                for attempting_request in attempting_requests:
+                    attempting_request.update_state(Request.REFUSED)
                 
             DLog.LogWhisper(f"New groupe: {activity.name}")
+            names = [
+                "michelle",
+                "bertrand",
+                "marie",
+                "jean-claude",
+                "jacques"
+            ]
+            ticket["names"] = names
+            new_groupe["ticket"] = ticket
             return True, {
-                "targets": targets,
-                "message": new_groupe
+                "targets": new_groupe_targets,
+                "message": json_encode(new_groupe)
             }
         else:
             DLog.LogError(f"Error to insert a room. Activity: {activity.name}")
