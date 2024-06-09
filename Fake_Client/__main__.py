@@ -4,11 +4,11 @@ from ActivitySimulation import ActivitySimulation
 import time, json
 
 class MyDelegate(WSDelegate):
-    def __init__(self, data_to_send:list[str] = [], sending_delta:int = 10) -> None:
+    def __init__(self, data:dict = {}, sending_delta:int = 10) -> None:
         super().__init__()
         self.ws_client = None
         self.has_sending = False
-        self.data_to_send = data_to_send
+        self.data = data
         self.sending_delta = sending_delta
 
     def set_ws_client(self, ws_client):
@@ -21,11 +21,8 @@ class MyDelegate(WSDelegate):
         super().on_message(message)
         if not self.has_sending:
             self.has_sending = True
-            while self.data_to_send:
-                data = self.data_to_send.pop(0)
-                if self.data_to_send == []:
-                    data["is_last"] = True
-                self.ws_client.send_message(json.dumps(data))
+            if self.data:
+                self.ws_client.send_message(json.dumps(self.data))
                 time.sleep(self.sending_delta) #! TIMING
 
     def on_close(self):
@@ -35,10 +32,11 @@ class MyDelegate(WSDelegate):
         super().on_error(error)
 
 #! ATTENTION SI PLUSIEURS DATA TO SEND => UN TIME.SLEEP EST EFFECTUE
-data_to_send = [
-    ActivitySimulation.add_scrabble()
-]
-my_delegate = MyDelegate(data_to_send)
+data = ActivitySimulation.add([
+        ActivitySimulation.GOUTER
+    ]
+)
+my_delegate = MyDelegate(data)
 # client = WSClient.connectToLocalhost(my_delegate)
 client = WSClient.connectToVPS(my_delegate)
 my_delegate.set_ws_client(client)
