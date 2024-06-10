@@ -59,6 +59,10 @@ class Request(BaseModel):
     def get_attempting_requests(cls) -> List["Request"]:
         return list(cls.select().where(Request.state == Request.ATTEMPTING))
 
+    @classmethod
+    def has_attempting_request(cls) -> bool:
+        return len(cls.get_attempting_requests()) > 0
+
     def update_state(self, state: str) -> bool:
         if not Request.__check_state_value(state):
             return False

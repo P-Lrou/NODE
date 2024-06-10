@@ -110,7 +110,8 @@ class ActivitiesManager:
                     request_message = json_encode({"type": "new_request"})
                     data_to_send.append({
                         "targets": "all",
-                        "message": request_message
+                        "message": request_message,
+                        "sender": data["client_uid"]
                     })
                     DLog.LogWhisper(f"New request")
                     
@@ -168,6 +169,14 @@ class ActivitiesManager:
             if "client_uid" in data:
                 activities: list[Activity] = Activity.get_activities_by_names(activities_type)
                 if len(activities) > 0:
+                    if Request.has_attempting_request():
+                        request_message = json_encode({"type": "no_attempting"})
+                        data_to_send.append({
+                            "targets": "all",
+                            "message": request_message
+                        })
+                        DLog.LogWhisper(f"No attempting")
+
                     client: Client = Client.get_first_client_by_uid(data["client_uid"])
                     if client:
                         for activity in activities:

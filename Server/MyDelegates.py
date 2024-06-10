@@ -65,9 +65,23 @@ class WSServerCallback(WSServerDelegate):
         if "targets" in data:
             if "message" in data:
                 if data["targets"] == "all":
-                    DLog.LogWhisper(f"sending => {data['message']}")
-                    for client in server.clients:
-                        server.send_message(client, data["message"])
+                    if "sender" in data:
+                        sender = None
+                        attempting_requests = Request.get_attempting_requests()
+                        request_clients = [str(request.client_id) for request in attempting_requests]
+                        clients = Client.get_all()
+                        for request_client in request_clients:
+                            for client in clients:
+                                if int(request_client) == int(client.id):
+                                    sender = client.uid
+
+                        for client in server.clients:
+                            if client["uid"] != sender:
+                                server.send_message(client, data["message"])
+                    else:
+                        DLog.LogWhisper(f"sending => {data['message']}")
+                        for client in server.clients:
+                            server.send_message(client, data["message"])
                 else:
                     for uid in data["targets"]:
                         DLog.LogWhisper(f"sending => {data['message']}")
