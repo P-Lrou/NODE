@@ -23,7 +23,8 @@ class MyDelegate(WSDelegate):
             self.has_sending = True
             if self.data:
                 self.ws_client.send_message(json.dumps(self.data))
-                time.sleep(self.sending_delta) #! TIMING
+                # time.sleep(self.sending_delta) #! TIMING
+                # self.ws_client.send_message(json.dumps(ActivitySimulation.remove([ActivitySimulation.GOUTER])))
 
     def on_close(self):
         super().on_close()
@@ -36,6 +37,7 @@ data = ActivitySimulation.add([
         ActivitySimulation.GOUTER
     ]
 )
+
 my_delegate = MyDelegate(data)
 # client = WSClient.connectToLocalhost(my_delegate)
 client = WSClient.connectToVPS(my_delegate)

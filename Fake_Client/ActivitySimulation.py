@@ -19,7 +19,7 @@ class ActivityBuilder:
     @staticmethod
     def remove_state():
         return {
-            "state": "retire"
+            "state": "cancel"
         }
     
     @staticmethod
