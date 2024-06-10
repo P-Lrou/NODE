@@ -34,6 +34,12 @@ class PlaySound:
         volume = 10
         print_path = cls.init_path + Path.instance().found_sound
         cls.__play_sound(print_path, volume)
+
+    @classmethod
+    def test(cls) -> None:
+        volume = 10
+        print_path = cls.init_path + "discord_join.wav"
+        cls.__play_sound(print_path, volume)
         
     @classmethod
     def error(cls) -> None:

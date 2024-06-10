@@ -11,6 +11,7 @@ class MessageHandler:
     def __init__(self, iot_manager: "IOTManager") -> None:
         self.iot_manager = iot_manager
         self.trafic_led = LEDManager(pin_numbers=LedPins.instance().trafic_number)
+        self.printer = ThermalPrinter()
 
     def process_message(self, json_message):
         if "type" in json_message:
@@ -36,10 +37,7 @@ class MessageHandler:
                 ticket = Ticket.from_data(json_message["ticket"])
                 image_path = ticket.generate_image()
                 # PRINT IMAGE
-                # ThermalPrinter.switch_state()
-                # time.sleep(3)
-                ThermalPrinter.print(image_path)
-                # ThermalPrinter.switch_state()
+                self.printer.print(image_path)
                 DLog.LogSuccess(f"Printing of {activity_type} result...")
             elif json_message["type"] == "not_found":
                 activity_type = json_message["activity_type"]

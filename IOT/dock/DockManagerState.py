@@ -163,7 +163,7 @@ class SearchingDockManager(DockManagerState):
         self._searching(activity_type)
 
     def activity_cancel(self, activity_type: str) -> None:
-        self._cancel(activity_type)
+        self._waiting(activity_type)
 
     def activity_found(self, activity_type: str) -> None:
         self._found(activity_type)
@@ -175,7 +175,7 @@ class SearchingDockManager(DockManagerState):
 class FoundDockManager(DockManagerState):
     def __init__(self, dock_manager: "DockManager") -> None:
         super().__init__(dock_manager)
-        time_before_waiting = 2
+        time_before_waiting = 20
         Timer.instance("dock_manager").start(time_before_waiting, self._waiting)
 
     def activity_added(self, dock: "Dock") -> None:

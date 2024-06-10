@@ -9,7 +9,7 @@ class Ticket:
         self.participants = [participant.upper() for participant in participants]
         self.location = location.upper()
         self.image_generator = ImageGenerator()
-        self.top_padding = 250
+        self.top_padding = 400
 
     def generate_image(self) -> str:
         image_path = f"{Path.instance().init_image}generating/result.png"

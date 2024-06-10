@@ -1,4 +1,5 @@
 from printer.Ticket import Ticket
+from printer.Printer import ThermalPrinter
 
 data = {
     "activity": "promenade",
@@ -13,4 +14,6 @@ data = {
 }
 
 ticket = Ticket.from_data(data)
-ticket.generate_image()
+image_path = ticket.generate_image()
+printer = ThermalPrinter()
+printer.print(image_path)
