@@ -115,6 +115,9 @@ class DockSearching(DockState):
     def off(self):
         self._off()
 
+    def suggesting(self):
+        self._off()
+
     def found(self):
         self._found()
 
