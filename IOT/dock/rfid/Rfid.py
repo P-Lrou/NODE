@@ -28,6 +28,8 @@ class Rfid(CheckerInterface):
         self.card_presence = False
         self.array_detect_state = []
         self.last_badge_detected: Badge = None
+        self.last_time_badge_not_detected = None
+        self.delay_for_non_detected = 1
         self.test_timeout_seconds = 10 
 
     def __reinit(self):
@@ -48,6 +50,7 @@ class Rfid(CheckerInterface):
         self.__open()
         id, text = self.reader.read_no_block()
         if id:
+            self.last_time_badge_not_detected = None
             text = text.strip().replace(" ", "")
             if len(text) == 0:
                 DLog.LogError("Error to read")
@@ -63,21 +66,14 @@ class Rfid(CheckerInterface):
             self.array_detect_state.append(None)
             if len(self.array_detect_state) >= 2:
                 self.array_detect_state = []
-                if self.delegate:
-                    self.delegate.rfid_not_detected(self)
-                    if self.card_presence:
-                        self.delegate.rfid_removed(self)
-                self.card_presence = False
-        self.__close()
-
-    def write_no_block(self, text_to_write):
-        self.__open()
-        id, text = self.reader.write(text_to_write)
-        if self.delegate:
-            if id:
-                self.delegate.rfid_has_written(text)
-            else:
-                self.delegate.rfid_not_written()
+                if self.last_time_badge_not_detected is None:
+                    self.last_time_badge_not_detected = time.time()
+                if time.time() >= self.last_time_badge_not_detected + self.delay_for_non_detected:
+                    if self.delegate:
+                        self.delegate.rfid_not_detected(self)
+                        if self.card_presence:
+                            self.delegate.rfid_removed(self)
+                    self.card_presence = False
         self.__close()
 
     def process_checker(self):
