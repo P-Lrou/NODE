@@ -3,14 +3,14 @@ from tools.DLog import DLog
 import time
 
 class LEDManager:
-    def __init__(self, pin_numbers: list[int] = None, pin_by_name: dict[str, int]=None):
+    def __init__(self, pin_numbers: list[int] = [], pin_by_name: dict[str, int] = {}):
         self.counter = 0
         self.leds: list[Led] = []
-        self.leds_by_pin: dict[any, Led] = {}
+        self.leds_by_pin: dict = {}
         self.key_type = None
         if pin_numbers is None and pin_by_name is None:
             DLog.LogError("pin_numbers and pin_by_name is None")
-        elif pin_numbers is not None and pin_by_name is not None:
+        elif len(pin_numbers) > 0 and pin_by_name:
             DLog.LogError("You can not instanciate leds by pin_numbers and pin_by_name")
         else:
             if pin_numbers is not None:
@@ -122,7 +122,7 @@ class LEDManager:
             led.off()
         self.counter = 0
 
-    def blink_int(self, pin_number: str, blinking_repeat: int = 5) -> bool:
+    def blink_int(self, pin_number: int, blinking_repeat: int = 5) -> bool:
         for i in range (0, blinking_repeat):
             if not self.on_int(pin_number):
                 return False
@@ -131,7 +131,7 @@ class LEDManager:
                 return False
         return True
     
-    def blink_name(self, pin_name: str, blinking_repeat: int = 5, delta_time_seconds: int = 0.3) -> bool:
+    def blink_name(self, pin_name: str, blinking_repeat: int = 5, delta_time_seconds: float = 0.3) -> bool:
         for i in range (0, blinking_repeat):
             if not self.on_name(pin_name):
                 return False
@@ -140,7 +140,7 @@ class LEDManager:
                 return False
         return True
 
-    def all_blinking(self, blinking_repeat: int = 5, delta_time_seconds: int = 0.3):
+    def all_blinking(self, blinking_repeat: int = 5, delta_time_seconds: float = 0.3):
         for i in range(0, blinking_repeat):
             for led in self.leds:
                 led.on()
@@ -149,7 +149,7 @@ class LEDManager:
                 led.off()
             time.sleep(delta_time_seconds)
 
-    def blinking(self, blinking_repeat: int = 5, delta_time_seconds: int = 0.3):
+    def blinking(self, blinking_repeat: int = 5, delta_time_seconds: float = 0.3):
         for i in range(0, blinking_repeat):
             for led in self.leds:
                 led.off()

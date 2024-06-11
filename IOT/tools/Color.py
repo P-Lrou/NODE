@@ -2,8 +2,8 @@ class Color:
     BELOTE = (229, 36, 33)
     TRIOMINO = (52, 96, 170)
     SCRABBLE = (251, 187, 14)
-    GOUTER = (232, 44, 136)
-    PETANQUE = (149, 27, 129)
+    GOUTER = (255, 88, 139)
+    PETANQUE = (176, 37, 255)
     PROMENADE = (87, 176, 49)
 
     WHITE = (255, 255, 255)

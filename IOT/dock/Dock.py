@@ -28,7 +28,7 @@ class Dock(RfidDelegate):
                 "removed": None
             }
         }
-        self.sound_volume = 10
+        self.sound_volume = 50
         self.activity_badge: ActivityBadge = None
         self._has_activity = False
 

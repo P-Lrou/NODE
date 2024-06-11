@@ -27,7 +27,7 @@ class RfidPins(Singleton):
           
 class ButtonPins(Singleton):
     def __init__(self) -> None:
-        self.sending_button_number = 16
+        self.sending_button_number = 12
 
         
 class Activities(Singleton):

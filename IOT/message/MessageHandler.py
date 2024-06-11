@@ -17,10 +17,10 @@ class MessageHandler:
         if "type" in json_message:
             if json_message["type"] == "new_request":
                 # SWITCH ON ONE CLASSIC LED
-                self.trafic_led.all_on(blinking_repeat=1)
+                self.trafic_led.all_on()
             elif json_message["type"] == "no_attempting":
                 # SWITCH OFF ONE CLASSIC LED
-                self.trafic_led.all_off(blinking_repeat=1)
+                self.trafic_led.all_off()
             elif json_message["type"] == "search":
                 activity_type = json_message["activity_type"]
                 # LIGHT ON RING LED
