@@ -69,11 +69,8 @@ class ActivitiesManager:
                 
             DLog.LogWhisper(f"New groupe: {activity.name}")
             names = [
-                "michelle",
-                "bertrand",
-                "marie",
-                "jean-claude",
-                "jacques"
+                "Pierre-Louis",
+                "Jade"
             ]
             ticket["names"] = names
             new_groupe["ticket"] = ticket
