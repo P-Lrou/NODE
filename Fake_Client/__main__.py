@@ -34,7 +34,7 @@ class MyDelegate(WSDelegate):
 
 #! ATTENTION SI PLUSIEURS DATA TO SEND => UN TIME.SLEEP EST EFFECTUE
 data = ActivitySimulation.add([
-        ActivitySimulation.GOUTER
+        ActivitySimulation.SCRABBLE
     ]
 )
 
