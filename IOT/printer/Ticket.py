@@ -17,7 +17,7 @@ class Ticket:
             image_name = "ticket_6_participants.png"
         else:
             image_name = "ticket_4_participants.png"
-        image: Image = self.image_generator.get_image(image_name)
+        image = self.image_generator.get_image(image_name)
         text_activity = TextAccessories.text_activity(self.activity)
         self.image_generator.write_text(image, text_activity)
         text_hour = TextAccessories.text_hour(self.hour)

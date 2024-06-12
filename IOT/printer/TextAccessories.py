@@ -21,7 +21,7 @@ class TextAccessories:
     @staticmethod
     def text_activity(text: str):
         text_accessories = TextAccessories(text)
-        text_accessories.rect_position = (52, 94, 465, 150)
+        text_accessories.rect_position = (52, 94, 465, 213)
         text_accessories.h_centered = TextHCenter.CENTER
         text_accessories.v_centered = True
 
@@ -33,7 +33,7 @@ class TextAccessories:
     @staticmethod
     def text_hour(text: str):
         text_accessories = TextAccessories(text)
-        text_accessories.rect_position = (52, 370, 465, 150)
+        text_accessories.rect_position = (52, 370, 465, 215)
         text_accessories.h_centered = TextHCenter.CENTER
         text_accessories.v_centered = True
 
@@ -42,6 +42,7 @@ class TextAccessories:
 
         return text_accessories
     
+    @staticmethod
     def text_participant(text: str, position_x: int, position_y: int):
         text_accessories = TextAccessories(text)
         text_accessories.text = text.replace("-", "\n").replace(" ", "\n")
@@ -58,6 +59,7 @@ class TextAccessories:
 
         return text_accessories
     
+    @staticmethod
     def text_location(text: str, participant_number: int):
         text_accessories = TextAccessories(text)
         y = 955
