@@ -13,19 +13,19 @@ class ActivityBuilder:
     @staticmethod
     def add_state():
         return {
-            "state": "joined"
+            "state": "request"
         }
     
     @staticmethod
     def remove_state():
         return {
-            "state": "retired"
+            "state": "cancel"
         }
     
     @staticmethod
-    def set_activity(activity):
+    def set_activity(activities):
         return {
-            "activity_type": activity
+            "activities_type": activities
         }
     
     def merge_data(type, state, activity):
@@ -36,113 +36,29 @@ class ActivityBuilder:
         }
 
 class ActivitySimulation:
+    BELOTE = "belote"
+    SCRABBLE = "scrabble"
+    GOUTER = "gouter"
+    PROMENADE = "promenade"
+    PETANUE = "petanue"
+    TRIOMINO = "triomino"
     def __init__(self) -> None:
         pass
 
     @staticmethod
-    def add_belotte():
+    def add(activities):
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("belotte")
+            ActivityBuilder.set_activity(activities)
         )
-        return json.dumps(data)
+        return data
     
     @staticmethod
-    def remove_belotte():
+    def remove(activities):
         data = ActivityBuilder.merge_data(
             ActivityBuilder.type(),
             ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("belotte")
+            ActivityBuilder.set_activity(activities)
         )
-        return json.dumps(data)
-    
-    @staticmethod
-    def add_scrabble():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("scrabble")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def remove_scrabble():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("scrabble")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def add_echecs():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("echecs")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def remove_echecs():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("echecs")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def add_tarot():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("tarot")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def remove_tarot():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("tarot")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def add_bridge():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("bridge")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def remove_bridge():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("bridge")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def add_balade():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.add_state(),
-            ActivityBuilder.set_activity("balade")
-        )
-        return json.dumps(data)
-    
-    @staticmethod
-    def remove_balade():
-        data = ActivityBuilder.merge_data(
-            ActivityBuilder.type(),
-            ActivityBuilder.remove_state(),
-            ActivityBuilder.set_activity("balade")
-        )
-        return json.dumps(data)
+        return data

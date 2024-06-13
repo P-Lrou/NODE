@@ -1,87 +1,256 @@
-import json
+# TOOLS
 from tools.DLog import DLog
+from tools.JSONTools import *
+# MODEL
+from Model.BaseModel import BaseModel
 from Model.Activity import Activity
+from Model.Client import Client
+from Model.Contact import Contact
+from Model.Request import Request
 from Model.Room import Room
 from Model.Participant import Participant
 
 class ActivitiesManager:
     def __init__(self):
-        Room.truncate_table()
-        Participant.truncate_table()
-        pass
-    
-    def add_participant(self, room_id, client):
-        room = Room.get_or_none(Room.id == room_id)
+        self.tables: list[BaseModel] = [
+            Activity,
+            Client,
+            Contact,
+            Request,
+            Room,
+            Participant
+        ]
+        self.tables_to_reset: list[BaseModel] = [
+            Request,
+            Room,
+            Participant
+        ]
+
+    def reset_database(self):
+        for table in self.tables_to_reset:
+            table.truncate_table()
+
+    @staticmethod
+    def create_groupe(activity: Activity) -> tuple[bool, dict]:
+        new_groupe = {
+            "type": "found",
+            "activity_type": activity.name,
+            "ticket": {}
+        }
+        ticket = {
+            "activity": activity.name,
+            "hour": "",
+            "names": [],
+            "location": "réfectoire"
+        }
+        names = []
+        new_groupe_targets = []
+        room: Room = Room.insert(activity)
         if room:
-            if Participant.insert_participant(client["id"], client["uid"], room):
-                return True
+            ticket["hour"] = str(room.get_rdv_time())
+            attempting_clients = activity.get_attempting_clients()
+            for attempting_client in attempting_clients:
+                request = attempting_client.get_attempting_request_by_activity(activity)
+                if request:
+                    request.update_state(Request.ACCEPTED)
+                    participant: Participant = Participant.insert(attempting_client, room)
+                    if participant:
+                        # names.append(attempting_client.contact.name)
+                        new_groupe_targets.append(attempting_client.uid)
+                    else:
+                        DLog.LogError(f"Error to insert a participant. Client id: {attempting_client}, Room id: {room}")
+                        return False, {}
+                else:
+                    DLog.LogError(f"Request of activity client not found. Client id: {attempting_client}, Activity: {activity.name}")
+                    return False, {}
+                attempting_requests = attempting_client.get_attempting_requests()
+                for attempting_request in attempting_requests:
+                    attempting_request.update_state(Request.REFUSED)
+                
+            DLog.LogWhisper(f"New groupe: {activity.name}")
+            names = [
+                "Pierre-Louis",
+                "Jade"
+            ]
+            ticket["names"] = names
+            new_groupe["ticket"] = ticket
+            return True, {
+                "targets": new_groupe_targets,
+                "message": json_encode(new_groupe)
+            }
+        else:
+            DLog.LogError(f"Error to insert a room. Activity: {activity.name}")
+        return False, {}
+
+    @classmethod
+    def looking_for_groupe(cls, client: Client) -> tuple[bool, dict]:
+        requests = client.get_requests()
+        number_by_activity: dict[Activity, int] = {request.activity: len(request.activity.get_requests()) for request in requests}
+        sorted_number_by_activity = dict(sorted(number_by_activity.items(), key=lambda item: item[1], reverse=True))
+        for activity in sorted_number_by_activity.keys():
+            if activity.has_max_participants():
+                return cls.create_groupe(activity)
+            return False, {}
+        DLog.LogError(f"No activity found")
+        return False, {}
+
+    @classmethod
+    def new_request(cls, data: dict) -> list[dict]:
+        data_to_send: list[dict] = []
+        message_error = ""
+
+        if "activities_type" in data: 
+            activities_type = data["activities_type"]
+            if "client_uid" in data: 
+                activities: list[Activity] = Activity.get_activities_by_names(activities_type)
+                if len(activities) > 0:
+                    request_message = json_encode({"type": "new_request"})
+                    data_to_send.append({
+                        "targets": "all",
+                        "message": request_message,
+                        "sender": data["client_uid"]
+                    })
+                    DLog.LogWhisper(f"New request")
+                    
+                    client: Client = Client.get_first_client_by_uid(data["client_uid"])
+                    if client:
+                        for key, activity in enumerate(activities):
+                            attempting_request = client.get_attempting_request_by_activity(activity)
+                            if not attempting_request:
+                                request = Request.insert(Request.ATTEMPTING, activity, client)
+                                if request:
+                                    search_message = json_encode({"type": "search", "activity_type": activity.name})
+                                    search_targets = [data["client_uid"]]
+                                    data_to_send.append({
+                                        "targets": search_targets,
+                                        "message": search_message
+                                    })
+                                    DLog.LogWhisper(f"New search: {activity.name}")
+                                    
+                                    # Check for group only after processing all activities
+                                    if key == len(activities) - 1:
+                                        has_groupe, new_data = cls.looking_for_groupe(client)
+                                        if has_groupe:
+                                            data_to_send.append(new_data)
+                                else:
+                                    message_error = "Error to insert a request"
+                                    break
+                            else:
+                                message_error = f"Request for activity {activity.name} already exists"
+                                break
+                    else:
+                        message_error = f"No client found with uid: {data['client_uid']}"
+                else:
+                    message_error = f"No activities found with that names: {', '.join(activities_type)}"
             else:
-                DLog.LogError("Error when inserting participant")
+                message_error = "No 'client_uid' key in data"
         else:
-            DLog.LogError(f"Room not found")
-        return False
-    
-    def remove_participant(self, client):
-        participants = Participant.get_participants_by_uid(client["uid"])
-        if len(participants) > 0:
-            for participant in participants:
-                Participant.delete_by_id(participant)
-            return True
-        else:
-            DLog.LogError(f"Any participant with this uid has found")
-        return False
-    
-    def remove_participant_by_activity_type(self, activity_type, client):
-        activity = Activity.get_activity_by_name(activity_type)
-        if activity:
-            participants = activity.get_participants()
-            if len(participants) > 0:
-                for participant in participants:
-                    if participant.uid == client["uid"]:
-                        Participant.delete_by_id(participant)
-                return True
-            else:
-                DLog.LogError(f"Any participant with this uid has found in '{activity_type} activity")
-        else:
-            DLog.LogError(f"Activity '{activity_type}' not found")
-        return False
-    
-    def get_participant_by_uid(self, client):
-        return Participant.get_participants_by_uid(client["uid"])
+            message_error = "No 'activities_type' in data"
+        
+        if message_error:
+            data_to_send.append({
+                "targets": [data["client_uid"]],
+                "message": message_error
+            })
+            DLog.LogError(message_error)
+        return data_to_send
 
 
-    def get_participants_by_room(self, room_id):
-        room = Room.get_or_none(Room.id == room_id)
-        if room:
-            return room.get_participants()
-        else:
-            return []
-    
-    def open_new_room(self, activity_type):
-        activity = Activity.get_activity_by_name(activity_type)
-        if activity:
-            return Room.insert_room(activity)
-        else:
-            return None
-    
-    def get_opened_room(self, activity_type):
-        activity = Activity.get_activity_by_name(activity_type)
-        if activity:
-            rooms = activity.get_opened_rooms()
-            if len(rooms) > 0:
-                return rooms[0]
+    @staticmethod
+    def cancel(data: dict) -> list[dict]:
+        data_to_send: list[dict] = []
+        message_error = ""
+        
+        if "activities_type" in data:
+            activities_type = data["activities_type"]
+            if "client_uid" in data:
+                activities: list[Activity] = Activity.get_activities_by_names(activities_type)
+                if len(activities) > 0:
+                    if Request.has_attempting_request():
+                        request_message = json_encode({"type": "no_attempting"})
+                        data_to_send.append({
+                            "targets": "all",
+                            "message": request_message
+                        })
+                        DLog.LogWhisper(f"No attempting")
+
+                    client: Client = Client.get_first_client_by_uid(data["client_uid"])
+                    if client:
+                        for activity in activities:
+                            request = client.get_attempting_request_by_activity(activity)
+                            if request:
+                                request.update_state(Request.REFUSED)
+                                cancel_message = json_encode({"type": "cancel", "activity_type": activity.name})
+                                data_to_send.append({
+                                    "targets": [data["client_uid"]],
+                                    "message": cancel_message
+                                })
+                                DLog.LogWhisper(f"Cancel request: {activity.name}")
+                            else:
+                                message_error = f"Request for activity {activity.name} not found for client {data['client_uid']}."
+                                break
+                    else:
+                        message_error = f"No client found with uid: {data['client_uid']}"
+                else:
+                    message_error = f"No activities found with names: {', '.join(activities_type)}"
             else:
-                return None
+                message_error = "No 'client_uid' key in data"
         else:
-            DLog.LogError(f"Activity {activity_type} not found")
-        return None
+            message_error = "No 'activities_type' in data"
+
+        if message_error:
+            data_to_send.append({
+                "targets": [data["client_uid"]],
+                "message": message_error
+            })
+            DLog.LogError(message_error)
+        return data_to_send
+
+    @staticmethod
+    def cancel_by_disconnection(client):
+        client: Client = Client.get_first_client_by_uid(client["uid"])
+        if client:
+            requests = client.get_attempting_requests()
+            for request in requests:
+                request.update_state(Request.DISCONNECTED)
+            DLog.LogWhisper("Disconnection of a client, DISCONNECTED all of his attempting requests")
+        else:
+            DLog.LogError(f"No client found. uid: {client['uid']}")
     
-    def delete_room(self, room_id):
-        room = Room.get_or_none(Room.id == room_id)
-        if room:
-            Room.delete_by_id(room)
-            return True
+    @staticmethod
+    def request_by_reconnection(client):
+        client: Client = Client.get_first_client_by_uid(client["uid"])
+        if client:
+            requests = client.get_disconnected_requests()
+            for request in requests:
+                request.update_state(Request.ATTEMPTING)
+            DLog.LogWhisper("Reconnection of a client, ATTEMPTING all of his disconnected requests")
         else:
-            DLog.LogError("Room not found")
-        return False
-            
+            DLog.LogError(f"No client found. uid: {client['uid']}")
+
+    def check_requests_waiting_time(self, callback, server):
+        data_to_send: list[dict] = []
+        requests: list[Request] = Request.get_attempting_requests()
+        for request in requests:
+            if request.has_exceeded_the_time_limit():
+                activity = request.activity
+                if activity.has_min_participants():
+                    has_groupe, new_data = self.create_groupe(activity)
+                    if has_groupe:
+                        data_to_send.append(new_data)
+                else:
+                    request.update_state(Request.REFUSED)
+                    targets = [request.client.uid]
+                    not_found_message = json_encode({"type": "not_found", "activity_type": activity.name})
+                    data_to_send.append({
+                        "targets": targets,
+                        "message": not_found_message
+                    })
+        if len(data_to_send) > 0:
+            callback(server, data_to_send)
+
+    def test(self) -> bool:
+        for table in self.tables:
+            if not table.test_connection():
+                return False
+        return True
